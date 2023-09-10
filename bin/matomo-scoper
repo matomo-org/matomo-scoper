@@ -1,0 +1,15 @@
+#!/usr/bin/env php
+<?php
+/**
+ * Matomo - free/libre analytics platform
+ *
+ * @link https://matomo.org
+ * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
+ */
+
+require __DIR__ . '/../vendor/autoload.php';
+
+use Matomo\Scoper\Application;
+
+$application = new Application();
+$application->run();
