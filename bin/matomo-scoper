@@ -11,5 +11,7 @@ require __DIR__ . '/../vendor/autoload.php';
 
 use Matomo\Scoper\Application;
 
+define('MATOMO_SCOPER_ROOT_PATH', dirname(__DIR__));
+
 $application = new Application();
 $application->run();
