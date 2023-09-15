@@ -50,11 +50,13 @@ class ComposerDependency
 
     public function writeComposerJsonContents(?array $composerJsonContents): void
     {
-        $composerJsonPath = $this->getComposerJsonPath();
+        $composerJsonPath = $this->rootPath . '/' . $this->dependencyPath . '/composer.json';
 
         $composerJsonContents = json_encode($composerJsonContents, JSON_PRETTY_PRINT);
 
-        mkdir(dirname($composerJsonPath), 0777, true);
+        if (!is_dir(dirname($composerJsonPath))) {
+            mkdir(dirname($composerJsonPath), 0777, true);
+        }
         file_put_contents($composerJsonPath, $composerJsonContents);
     }
 
@@ -62,11 +64,16 @@ class ComposerDependency
     {
         // some composer dependencies *cough*Symfony*cough* do not have a root composer.json file. instead it's nested
         // in some folders. we try to detect those here.
+        // TODO: maybe we should recurse through every folder and use the first one instead of just using the first?
         $path = $this->getDependencyPath();
+        if (!is_dir($path)) {
+            return null;
+        }
+
         while (!is_file($path . '/composer.json')) {
             $contents = scandir($path);
             $contents = array_filter($contents, function ($p) use ($path) { return $p != '.' && $p != '..' && is_dir($path . '/' . $p); });
-            if (count($contents) > 1) {
+            if (count($contents) !== 1) {
                 return null;
             }
 
@@ -101,6 +108,9 @@ class ComposerDependency
     public function getRequires(): array
     {
         $dependencies = array_keys($this->composerJsonContents['require'] ?? []);
+        $dependencies = array_filter($dependencies, function ($name) {
+            return $name !== 'php';
+        });
         $dependencies = array_map(function ($dependencySlug) {
             return new ComposerDependency($this->rootPath, $dependencySlug);
         }, $dependencies);

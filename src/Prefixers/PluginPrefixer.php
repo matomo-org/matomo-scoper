@@ -27,11 +27,11 @@ class PluginPrefixer extends Prefixer
         $this->dependenciesToPrefix = $this->pluginDetails->getDependenciesToPrefix();
     }
 
-    public function run(): void
+    public function run(): array
     {
         $scoperIncFile = new PluginScoperInc($this->paths->getRepoPath(), $this->pluginDetails->getPluginName());
         $scoperIncFile->writeIfNotExists();
 
-        parent::run();
+        return parent::run();
     }
 }

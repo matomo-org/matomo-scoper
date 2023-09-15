@@ -20,11 +20,15 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Filesystem\Filesystem;
 
+// TODO: use constructor promotion everywhere
 class ScopeCommand extends Command
 {
     const NAME = 'scope';
     const PHP_SCOPER_VERSION = '0.18.3';
-    const PHP_SCOPER_URL = 'https://github.com/humbug/php-scoper/releases/download/' . self::PHP_SCOPER_VERSION . '/php-scoper.phar';
+
+    // using custom build for included-namespaces feature
+    // const PHP_SCOPER_URL = 'https://github.com/humbug/php-scoper/releases/download/' . self::PHP_SCOPER_VERSION . '/php-scoper.phar';
+    const PHP_SCOPER_URL = 'https://github.com/matomo-org/php-scoper/releases/download/included-namespaces-1/php-scoper.phar';
 
     protected function configure(): void
     {
@@ -51,14 +55,14 @@ class ScopeCommand extends Command
 
         $isCore = !is_file($repoPath . '/plugin.json');
         if ($isCore) {
-            $output->writeln("Will scope core matomo at $repoPath");
+            $output->writeln("<info>Will scope core matomo at $repoPath</info>");
         } else {
-            $output->writeln("Will scope matomo plugin at $repoPath");
+            $output->writeln("<info>Will scope matomo plugin at $repoPath</info>");
         }
 
         if (!$bypassConfirmation) {
             $helper = $this->getHelper('question');
-            $question = new ConfirmationQuestion('Do you wish to continue?', false);
+            $question = new ConfirmationQuestion('Do you wish to continue? ', false);
             if (!$helper->ask($input, $output, $question)) {
                 $output->writeln("Aborting.");
                 return Command::SUCCESS;

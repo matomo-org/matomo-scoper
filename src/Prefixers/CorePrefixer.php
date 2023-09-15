@@ -8,6 +8,8 @@
 
 namespace Matomo\Scoper\Prefixers;
 
+use Matomo\Scoper\GeneratedFiles\CoreScoperInc;
+use Matomo\Scoper\GeneratedFiles\PluginScoperInc;
 use Matomo\Scoper\Prefixer;
 use Matomo\Scoper\Utilities\Paths;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -35,5 +37,13 @@ class CorePrefixer extends Prefixer
 
         $this->dependenciesToPrefix = self::SUPPORTED_CORE_DEPENDENCIES;
         $this->dependenciesToIgnore = self::DEPENDENCIES_TO_IGNORE;
+    }
+
+    public function run(): array
+    {
+        $scoperIncFile = new CoreScoperInc($this->paths->getRepoPath());
+        $scoperIncFile->writeIfNotExists();
+
+        return parent::run();
     }
 }
