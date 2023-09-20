@@ -77,8 +77,9 @@ abstract class Prefixer
 
     private function removePrefixedDependencies(array $dependenciesToPrefix): void
     {
+        $vendorPath = $this->paths->getRepoPath() . '/vendor/';
         foreach ($dependenciesToPrefix as $dependencyPath) {
-            $this->filesystem->remove($this->paths->getRepoPath() . '/vendor/' . $dependencyPath);
+            $this->filesystem->remove([$vendorPath . $dependencyPath, dirname($vendorPath . $dependencyPath)]);
         }
     }
 

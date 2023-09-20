@@ -35,19 +35,21 @@ class ComposerProject
         preg_match('/public static \$files.*?;/s', $autoloadStaticContents, $matches);
         $autoloadFiles = $matches[0];
 
-        $autoloadFiles = preg_split('/,\s*/', $autoloadFiles);
+        $autoloadFiles = preg_split('/[,()]+\s*/', $autoloadFiles);
         foreach ($autoloadFiles as $key => $line) {
             if (!preg_match("/'\/..'\s+\.\s+'(.*?)'/", $line, $matches)) {
+                unset($autoloadFiles[$key]);
                 continue;
             }
 
             $relativePath = $matches[1];
-            if (!is_file($this->path . '/vendor' . $relativePath)) { // dependency was prefixed
+            if (!$this->filesystem->exists($this->path . '/vendor' . $relativePath)) { // dependency was prefixed
                 unset($autoloadFiles[$key]);
             }
         }
 
         $autoloadFiles = implode(",\n", $autoloadFiles);
+        $autoloadFiles = "public static \$files = array(\n" . $autoloadFiles . ");\n";
         return $autoloadFiles;
     }
 
@@ -101,7 +103,8 @@ class ComposerProject
      */
     public function removeDummyComposerJsonFilesForPrefixedDeps(): void
     {
-        $prefixedPath = $this->path . '/vendor/prefixed';
+        $vendorPath = $this->path . '/vendor/';
+        $prefixedPath = $vendorPath . 'prefixed';
 
         foreach (scandir($prefixedPath) as $folder) { // TODO: refactor for loops
             if ($folder == '.' || $folder == '..') {
@@ -113,8 +116,8 @@ class ComposerProject
                     continue;
                 }
 
-                $tempUnprefixedPath = $this->path . '/vendor/' . $folder . '/' . $subfolder;
-                $this->filesystem->remove($tempUnprefixedPath);
+                $tempUnprefixedPath = $vendorPath . $folder . '/' . $subfolder;
+                $this->filesystem->remove([$tempUnprefixedPath, $vendorPath . $folder]);
             }
         }
     }

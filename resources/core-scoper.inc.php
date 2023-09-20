@@ -52,6 +52,11 @@ if ($isRenamingReferences) {
     }, $dependenciesToPrefix);
 }
 
+$namespacesToIncludeRegexes = array_map(function ($n) {
+    $n = rtrim($n, '\\');
+    return '/^' . preg_quote($n) . '(?:\\\\|$)/';
+}, $namespacesToPrefix);
+
 return [
     'expose-global-constants' => false,
     'expose-global-classes' => false,
@@ -61,14 +66,20 @@ return [
     'finders' => $finders,
     'patchers' => [
         // patchers for twig
-        static function (string $filePath, string $prefix, string $content): string {
+        static function (string $filePath, string $prefix, string $content) use ($isRenamingReferences): string {
             // correct use statements in generated templates
             if (preg_match('%twig/src/Node/ModuleNode\\.php$%', $filePath)) {
                 return str_replace('"use Twig\\', '"use ' . str_replace('\\', '\\\\', $prefix) . '\\\\Twig\\', $content);
             }
 
-            // correctly scoped function calls to twig_... globals (which will not be globals anymore) in strings
-            if (strpos($filePath, 'twig/twig') !== false) {
+            // correctly scope function calls to twig_... globals (which will not be globals anymore) in strings
+            if (strpos($filePath, 'twig/twig') !== false
+                || ($isRenamingReferences && preg_match('/\\.php$/', $filePath))
+            ) {
+                if ($isRenamingReferences) {
+                    $content = preg_replace("/([^'\"])(_?twig_[a-z_0-9]+)\\(/", '${1}\\Matomo\\Dependencies\\\${2}(', $content);
+                }
+
                 $content = preg_replace("/'(_?twig_[a-z_0-9]+)([('])/", '\'\\Matomo\\Dependencies\\\${1}${2}', $content);
                 $content = preg_replace("/\"(_?twig_[a-z_0-9]+)([(\"])/", '"\\\\\\Matomo\\\\\\Dependencies\\\\\\\${1}${2}', $content);
 
@@ -78,10 +89,32 @@ return [
 
             return $content;
         },
+
+        // php-di has trouble w/ core\DI.php, since it has a class named DI and uses the DI namespace. replacing manually here.
+        static function (string $filePath, string $prefix, string $content) use ($isRenamingReferences): string {
+            if (!$isRenamingReferences || !preg_match('%core/DI\\.php%', $filePath)) {
+                return $content;
+            }
+
+            $content = str_replace('use DI ', 'use Matomo\\Dependencies\\DI ', $content);
+            $content = str_replace('\\DI\\', 'Matomo\\Dependencies\\DI\\', $content);
+
+            return $content;
+        },
+
+        // the config/config.php file can sometimes be rendered empty (if, it just has return [], eg)
+        static function (string $filePath, string $prefix, string $content) use ($isRenamingReferences): string {
+            if (!$isRenamingReferences || !preg_match('%config/config\\.php%', $filePath)) {
+                return $content;
+            }
+
+            if (preg_match('/^<\\?php\s+$/', $content)) {
+                $content = '<?php return [];';
+            }
+
+            return $content;
+        },
     ],
-    'include-namespaces' => array_map(function ($n) {
-        $n = rtrim($n, '\\');
-        return '/^' . preg_quote($n) . '(?:\\|$)/';
-    }, $namespacesToPrefix),
+    'include-namespaces' => $namespacesToIncludeRegexes,
     'exclude-namespaces' => $namespacesToExclude,
 ];
