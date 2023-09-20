@@ -35,7 +35,7 @@ class ComposerProject
         preg_match('/public static \$files.*?;/s', $autoloadStaticContents, $matches);
         $autoloadFiles = $matches[0];
 
-        $autoloadFiles = explode("\n", $autoloadFiles);
+        $autoloadFiles = preg_split('/,\s*/', $autoloadFiles);
         foreach ($autoloadFiles as $key => $line) {
             if (!preg_match("/'\/..'\s+\.\s+'(.*?)'/", $line, $matches)) {
                 continue;
@@ -47,7 +47,7 @@ class ComposerProject
             }
         }
 
-        $autoloadFiles = implode("\n", $autoloadFiles);
+        $autoloadFiles = implode(",\n", $autoloadFiles);
         return $autoloadFiles;
     }
 

@@ -26,6 +26,8 @@ class PhpScoper extends ShellCommand
      */
     private array $namespacesToInclude;
 
+    private bool $renameReferences = false;
+
     public function __construct(Paths $paths, OutputInterface $output, array $dependenciesToPrefix, array $namespacesToInclude)
     {
         parent::__construct($output);
@@ -39,17 +41,32 @@ class PhpScoper extends ShellCommand
         }
     }
 
+    public function renameReferences(bool $value)
+    {
+        $this->renameReferences = $value;
+    }
+
     protected function getCommand(): string
     {
         $vendorPath = $this->paths->getRepoPath() . '/vendor';
+        $configPath = '../scoper.inc.php';
+        $outputDir = './prefixed/';
 
         $phpBinary = $this->paths->getPhpBinaryPath();
         $phpScoper = $this->paths->getPhpScoperPath();
 
         $env = 'MATOMO_DEPENDENCIES_TO_PREFIX="' . addslashes(json_encode($this->dependenciesToPrefix)) . '" '
             . 'MATOMO_NAMESPACES_TO_PREFIX="' . addslashes(json_encode($this->namespacesToInclude)) . '"';
+
+        if ($this->renameReferences) {
+            $env .= " MATOMO_RENAME_REFERENCES=1";
+            $vendorPath = $this->paths->getRepoPath();
+            $outputDir = './build';
+            $configPath = './scoper.inc.php';
+        }
+
         $command = 'cd ' . $vendorPath . ' && ' . $env . ' ' . $phpBinary . ' ' . $phpScoper
-            . ' add --force --output-dir=./prefixed/ --config=../scoper.inc.php';
+            . ' add --force --output-dir=' . $outputDir . ' --config=' . $configPath;
 
         return $command;
     }

@@ -50,7 +50,7 @@ class ComposerDependency
 
     public function writeComposerJsonContents(?array $composerJsonContents): void
     {
-        $composerJsonPath = $this->rootPath . '/' . $this->dependencyPath . '/composer.json';
+        $composerJsonPath = $this->rootPath . '/vendor/' . $this->dependencyPath . '/composer.json';
 
         $composerJsonContents = json_encode($composerJsonContents, JSON_PRETTY_PRINT);
 

@@ -16,14 +16,49 @@ use Isolated\Symfony\Component\Finder\Finder;
 
 $dependenciesToPrefix = json_decode(getenv('MATOMO_DEPENDENCIES_TO_PREFIX'), true);
 $namespacesToPrefix = json_decode(getenv('MATOMO_NAMESPACES_TO_PREFIX'), true);
+$isRenamingReferences = getenv('MATOMO_RENAME_REFERENCES') == 1;
 
-return [
-    'prefix' => 'Matomo\\Dependencies',
-    'finders' => array_map(function ($dependency) {
+$namespacesToExclude = [];
+$forceNoGlobalAlias = false;
+
+if ($isRenamingReferences) {
+    $finders = [
+        Finder::create()
+            ->files()
+            ->in(__DIR__)
+            ->exclude('build')
+            ->exclude('vendor')
+            ->exclude('node_modules')
+            ->exclude('tmp')
+            ->exclude('@types')
+            ->exclude('js')
+            ->exclude('lang')
+            ->notName('*.ini.php')
+            ->filter(function (\SplFileInfo $file) {
+                return !($file->isLink() && $file->isDir());
+            })
+            ->filter(function (\SplFileInfo $file) {
+                return !($file->isLink() && !$file->getRealPath());
+            }),
+    ];
+
+    $namespacesToExclude = ['/^$/'];
+    $forceNoGlobalAlias = true;
+} else {
+    $finders = array_map(function ($dependency) {
         return Finder::create()
             ->files()
             ->in($dependency);
-    }, $dependenciesToPrefix),
+    }, $dependenciesToPrefix);
+}
+
+return [
+    'expose-global-constants' => false,
+    'expose-global-classes' => false,
+    'expose-global-functions' => false,
+    'force-no-global-alias' => $forceNoGlobalAlias,
+    'prefix' => 'Matomo\\Dependencies',
+    'finders' => $finders,
     'patchers' => [
         // patchers for twig
         static function (string $filePath, string $prefix, string $content): string {
@@ -44,5 +79,9 @@ return [
             return $content;
         },
     ],
-    'include-namespaces' => $namespacesToPrefix,
+    'include-namespaces' => array_map(function ($n) {
+        $n = rtrim($n, '\\');
+        return '/^' . preg_quote($n) . '(?:\\|$)/';
+    }, $namespacesToPrefix),
+    'exclude-namespaces' => $namespacesToExclude,
 ];

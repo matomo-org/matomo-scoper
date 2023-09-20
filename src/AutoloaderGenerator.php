@@ -63,7 +63,6 @@ class AutoloaderGenerator
         $unprefixedAutoloadFiles = $composerProject->getUnprefixedAutoloadFiles();
         $composerProject->createDummyComposerJsonFilesForPrefixedDeps();
 
-        // TODO: comment
         try {
             $regenerateUnprefixedAutload = new DumpAutoload($this->paths, $this->output, $repoPath);
             $regenerateUnprefixedAutload->passthru();;
