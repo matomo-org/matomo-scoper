@@ -8,8 +8,6 @@
 
 namespace Matomo\Scoper\Composer;
 
-use Matomo\Scoper\Utilities\Paths;
-
 class ComposerDependency
 {
     private string $rootPath;
@@ -50,6 +48,8 @@ class ComposerDependency
 
     public function writeComposerJsonContents(?array $composerJsonContents): void
     {
+        $this->composerJsonContents = $composerJsonContents;
+
         $composerJsonPath = $this->rootPath . '/vendor/' . $this->dependencyPath . '/composer.json';
 
         $composerJsonContents = json_encode($composerJsonContents, JSON_PRETTY_PRINT);
@@ -64,7 +64,9 @@ class ComposerDependency
     {
         // some composer dependencies *cough*Symfony*cough* do not have a root composer.json file. instead it's nested
         // in some folders. we try to detect those here.
-        // TODO: maybe we should recurse through every folder and use the first one instead of just using the first?
+        //
+        // this only works where the package is just a couple nested folders and a composer.json file. in all other
+        // cases, it is expected this won't work.
         $path = $this->getDependencyPath();
         if (!is_dir($path)) {
             return null;
@@ -109,11 +111,12 @@ class ComposerDependency
     {
         $dependencies = array_keys($this->composerJsonContents['require'] ?? []);
         $dependencies = array_filter($dependencies, function ($name) {
-            return $name !== 'php';
+            return $name !== 'php' && strpos($name, 'ext-') !== 0;
         });
         $dependencies = array_map(function ($dependencySlug) {
             return new ComposerDependency($this->rootPath, $dependencySlug);
         }, $dependencies);
+        $dependencies = array_values($dependencies);
         return $dependencies;
     }
 

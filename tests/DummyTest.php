@@ -8,6 +8,7 @@
 
 namespace Matomo\Scoper\Tests;
 
+// TODO: remove
 class DummyTest extends \PHPUnit\Framework\TestCase
 {
     public function test_dummy()

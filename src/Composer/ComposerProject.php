@@ -25,17 +25,23 @@ class ComposerProject
     /**
      * TODO: document
      *
+     * TODO: this could be moved to a new AutoloadStatic class
+     *
      * @return string
      */
-    public function getUnprefixedAutoloadFiles(): string
+    public function getUnprefixedAutoloadFiles(): ?string
     {
-        $autoloadStatic = $this->path . '/vendor/composer/autoload_static.php';
+        $autoloadStatic = $this->getPathToAutoloadStaticFile();
         $autoloadStaticContents = file_get_contents($autoloadStatic);
+
+        if (empty($autoloadStaticContents)) {
+            return null;
+        }
 
         preg_match('/public static \$files.*?;/s', $autoloadStaticContents, $matches);
         $autoloadFiles = $matches[0];
 
-        $autoloadFiles = preg_split('/[,()]+\s*/', $autoloadFiles);
+        $autoloadFiles = preg_split('/[,()\[\]]+\s*/', $autoloadFiles);
         foreach ($autoloadFiles as $key => $line) {
             if (!preg_match("/'\/..'\s+\.\s+'(.*?)'/", $line, $matches)) {
                 unset($autoloadFiles[$key]);
@@ -75,7 +81,6 @@ class ComposerProject
                     continue;
                 }
 
-                // TODO: should just take a prefixed bool parameter
                 $dependency = new ComposerDependency($this->path, 'prefixed/' . $folder . '/' . $subfolder);
                 if (!$dependency->hasComposerJson()) {
                     continue;
@@ -89,7 +94,6 @@ class ComposerProject
                 $unprefixedDependency = new ComposerDependency($this->path, $folder . '/' . $subfolder);
                 $unprefixedDependency->writeComposerJsonContents($composerJsonContents);
 
-                // TODO: is still needed?
                 foreach ($autoload['classmap'] ?? [] as $classmapFolder) {
                     mkdir($unprefixedDependency->getDependencyPath() . '/' . $classmapFolder, 0777, true);
                 }
@@ -126,11 +130,16 @@ class ComposerProject
      * TODO document
      * @return void
      */
-    public function removeAutoloadFilesFromAutoloader(string $unprefixedAutoloadFiles): void
+    public function replaceStaticAutoloadFiles(string $unprefixedAutoloadFiles): void
     {
         $autoloadStatic = $this->path . '/vendor/composer/autoload_static.php';
         $autoloadStaticContents = file_get_contents($autoloadStatic);
         $autoloadStaticContents = preg_replace('/public static \$files.*?;/s', $unprefixedAutoloadFiles, $autoloadStaticContents);
         file_put_contents($autoloadStatic, $autoloadStaticContents);
+    }
+
+    private function getPathToAutoloadStaticFile(): string
+    {
+        return $this->path . '/vendor/composer/autoload_static.php';
     }
 }
