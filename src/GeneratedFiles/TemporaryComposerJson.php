@@ -11,6 +11,9 @@ namespace Matomo\Scoper\GeneratedFiles;
 use Matomo\Scoper\Composer\ComposerDependency;
 use Matomo\Scoper\GeneratedFile;
 
+/**
+ * TODO: document
+ */
 class TemporaryComposerJson extends GeneratedFile
 {
     /**

@@ -13,6 +13,13 @@ use Symfony\Component\Filesystem\Filesystem;
 
 abstract class ComposerTestCase extends TestCase
 {
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+
+        $this->removeTestProject();
+    }
+
     protected function setUpTestProject(?array $composerJsonContents, array $dependencies, ?array $dependencyComposerJsonContents): string
     {
         $this->removeTestProject();
@@ -43,5 +50,12 @@ abstract class ComposerTestCase extends TestCase
     protected function getTestProjectRootPath(): string
     {
         return __DIR__ . '/test-project';
+    }
+
+    protected function putTestProjectFile(string $relativePath, string $contents)
+    {
+        $path = $this->getTestProjectRootPath() . '/' . $relativePath;
+        @mkdir(dirname($path), 0777, true);
+        $this->assertNotFalse(file_put_contents($path, $contents));
     }
 }

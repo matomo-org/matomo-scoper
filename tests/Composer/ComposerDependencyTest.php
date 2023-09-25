@@ -15,13 +15,6 @@ class ComposerDependencyTest extends ComposerTestCase
 {
     const TEST_DEPENDENCY = 'test/dependency';
 
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-
-        $this->removeTestProject();
-    }
-
     public function test_hasComposerJson_returnsTrueIfAComposerJsonCanBeFound()
     {
         $rootPath = $this->setUpTestProject(null, [self::TEST_DEPENDENCY], []);

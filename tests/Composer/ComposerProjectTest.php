@@ -14,13 +14,6 @@ use Symfony\Component\Filesystem\Filesystem;
 
 class ComposerProjectTest extends ComposerTestCase
 {
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-
-        $this->removeTestProject();
-    }
-
     public function test_getUnprefixedAutoloadFiles_removesPrefixedFiles_whenAutoloadStaticPutsFilesOnOneLine()
     {
         $rootPath = $this->setUpTestProject([], ['mustangostang/spyc', 'lox/xhprof', 'szymach/c-pchart'], []);
@@ -609,12 +602,5 @@ class ComposerProjectTest extends ComposerTestCase
     {
         $contents = file_get_contents($this->getTestProjectRootPath() . '/vendor/' . $dependencyPath . '/composer.json');
         return json_decode($contents, true);
-    }
-
-    private function putTestProjectFile(string $relativePath, string $contents)
-    {
-        $path = $this->getTestProjectRootPath() . '/' . $relativePath;
-        @mkdir(dirname($path), 0777, true);
-        $this->assertNotFalse(file_put_contents($path, $contents));
     }
 }
