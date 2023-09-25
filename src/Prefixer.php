@@ -9,6 +9,7 @@
 namespace Matomo\Scoper;
 
 use Matomo\Scoper\Composer\ComposerDependency;
+use Matomo\Scoper\Composer\ComposerProject;
 use Matomo\Scoper\ShellCommands\PhpScoper;
 use Matomo\Scoper\Utilities\Paths;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -16,8 +17,6 @@ use Symfony\Component\Filesystem\Filesystem;
 
 abstract class Prefixer
 {
-    // TODO: document variables
-
     protected Paths $paths;
 
     protected Filesystem $filesystem;
@@ -58,7 +57,8 @@ abstract class Prefixer
 
         // create recursive symlink to directory to trick php scoper into replacing files in-place
         // Note: we should be using a patched php-scoper that does not delete the output directory, but in
-        // case we aren't, using this symlink approach means we won't accidentally delete the entire repo to be prefixed.
+        // case we aren't, using this symlink approach means we won't accidentally delete the entire repo
+        // we're trying to prefix.
         $buildPath = $this->paths->getRepoPath() . '/build';
         if (!is_dir($buildPath)) {
             symlink($this->paths->getRepoPath(), $buildPath);
@@ -85,34 +85,15 @@ abstract class Prefixer
 
     private function collectChildDependencies(): array
     {
-        $allDependenciesToPrefix = $this->dependenciesToPrefix;
+        $composerProject = new ComposerProject($this->paths->getRepoPath(), $this->filesystem);
+        $allDependencies = $composerProject->getFlatDependencyTreeFor($this->dependenciesToPrefix, $this->dependenciesToIgnore);
+
+        $allDependenciesToPrefix = [];
         $allNamespacesToInclude = [];
 
-        $dependenciesToProcess = $this->dependenciesToPrefix;
-        while (!empty($dependenciesToProcess)) {
-            $dependencySlug = array_shift($dependenciesToProcess);
-
-            $dependency = new ComposerDependency($this->paths->getRepoPath(), $dependencySlug);
-            if (!$dependency->hasComposerJson()) {
-                continue;
-            }
-
+        foreach ($allDependencies as $dependency) {
+            $allDependenciesToPrefix[] = $dependency->getRelativeDependencyPath();
             $allNamespacesToInclude = array_merge($allNamespacesToInclude, $dependency->getNamespaces());
-
-            $childDependencies = $dependency->getRequires();
-            foreach ($childDependencies as $childDep) {
-                $id = $childDep->getRelativeDependencyPath();
-
-                if (!$childDep->hasComposerJson()
-                    || in_array($id, $allDependenciesToPrefix)
-                    || in_array($id, $this->dependenciesToIgnore)
-                ) {
-                    continue;
-                }
-
-                $allDependenciesToPrefix[] = $id;
-                $dependenciesToProcess[] = $id;
-            }
         }
 
         return [$allDependenciesToPrefix, $allNamespacesToInclude];

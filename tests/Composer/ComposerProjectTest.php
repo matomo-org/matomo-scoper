@@ -8,6 +8,7 @@
 
 namespace Matomo\Scoper\Tests\Composer;
 
+use Matomo\Scoper\Composer\ComposerDependency;
 use Matomo\Scoper\Composer\ComposerProject;
 use Matomo\Scoper\Tests\Framework\ComposerTestCase;
 use Symfony\Component\Filesystem\Filesystem;
@@ -565,6 +566,116 @@ class ComposerProjectTest extends ComposerTestCase
             EOF,
             $actualContents
         );
+    }
+
+    public function test_getFlatDependencyTreeFor_returnsFlatDependencyTree_forGivenDependencies()
+    {
+        $rootPath = $this->setUpTestProject([], [
+            'org/dep1', // depends on org1/dep2
+            'org1/dep2', // depends on org1/dep3, org2/dep4
+            'org1/dep3', // depends on org/dep1 (cycle), org2/dep5
+            'org2/dep4',
+            'org2/dep5', // has no composer.json
+            'org3/dep6', // depends on org4/dep7
+            'org4/dep7', // has no composer.json
+        ], null);
+
+        $this->putTestProjectFile('vendor/org/dep1/composer.json', json_encode([
+            'require' => [
+                'org1/dep2' => '*',
+                'php' => '*',
+            ],
+        ]));
+        $this->putTestProjectFile('vendor/org1/dep2/composer.json', json_encode([
+            'require' => [
+                'org1/dep3' => '*',
+                'org2/dep4' => '*',
+            ],
+        ]));
+        $this->putTestProjectFile('vendor/org1/dep3/composer.json', json_encode([
+            'require' => [
+                'org/dep1' => '*',
+                'org2/dep5' => '*',
+                'ext-mbstring' => '*',
+            ],
+        ]));
+        $this->putTestProjectFile('vendor/org2/dep4/composer.json', json_encode([
+            'require' => [
+                // empty
+            ],
+        ]));
+        $this->putTestProjectFile('vendor/org3/dep6/composer.json', json_encode([
+            'require' => [
+                'org4/dep7' => '*',
+            ],
+        ]));
+
+        $composerProject = new ComposerProject($rootPath, new Filesystem());
+
+        $actual = $composerProject->getFlatDependencyTreeFor(['org/dep1', 'org4/dep7']);
+        $expected = [
+            new ComposerDependency($rootPath, 'org/dep1'),
+            new ComposerDependency($rootPath, 'org4/dep7'),
+            new ComposerDependency($rootPath, 'org1/dep2'),
+            new ComposerDependency($rootPath, 'org1/dep3'),
+            new ComposerDependency($rootPath, 'org2/dep4'),
+            new ComposerDependency($rootPath, 'org2/dep5'),
+        ];
+
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function test_getFlatDependencyTreeFor_ignoresDependencies_ifDependenciesToIgnoreRequested()
+    {
+        $rootPath = $this->setUpTestProject([], [
+            'org/dep1', // depends on org1/dep2
+            'org1/dep2', // depends on org1/dep3, org2/dep4
+            'org1/dep3', // depends on org/dep1 (cycle), org2/dep5
+            'org2/dep4',
+            'org2/dep5', // has no composer.json
+            'org3/dep6', // depends on org4/dep7
+            'org4/dep7', // has no composer.json
+        ], null);
+
+        $this->putTestProjectFile('vendor/org/dep1/composer.json', json_encode([
+            'require' => [
+                'org1/dep2' => '*',
+            ],
+        ]));
+        $this->putTestProjectFile('vendor/org1/dep2/composer.json', json_encode([
+            'require' => [
+                'org1/dep3' => '*',
+                'org2/dep4' => '*',
+            ],
+        ]));
+        $this->putTestProjectFile('vendor/org1/dep3/composer.json', json_encode([
+            'require' => [
+                'org/dep1' => '*',
+                'org2/dep5' => '*',
+            ],
+        ]));
+        $this->putTestProjectFile('vendor/org2/dep4/composer.json', json_encode([
+            'require' => [
+                // empty
+            ],
+        ]));
+        $this->putTestProjectFile('vendor/org3/dep6/composer.json', json_encode([
+            'require' => [
+                'org4/dep7' => '*',
+            ],
+        ]));
+
+        $composerProject = new ComposerProject($rootPath, new Filesystem());
+
+        $actual = $composerProject->getFlatDependencyTreeFor(['org/dep1', 'org4/dep7'], ['org1/dep3']);
+        $expected = [
+            new ComposerDependency($rootPath, 'org/dep1'),
+            new ComposerDependency($rootPath, 'org4/dep7'),
+            new ComposerDependency($rootPath, 'org1/dep2'),
+            new ComposerDependency($rootPath, 'org2/dep4'),
+        ];
+
+        $this->assertEquals($expected, $actual);
     }
 
     private function getTestProjectFiles()

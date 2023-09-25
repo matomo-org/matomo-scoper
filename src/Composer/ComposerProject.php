@@ -142,4 +142,43 @@ class ComposerProject
     {
         return $this->path . '/vendor/composer/autoload_static.php';
     }
+
+    /**
+     * @param string[] $dependenciesToPrefix
+     * @param string[] $dependenciesToIgnore
+     * @return ComposerDependency[]
+     */
+    public function getFlatDependencyTreeFor(array $dependenciesToPrefix, array $dependenciesToIgnore = []): array
+    {
+        $flatDependencyTree = [];
+
+        $dependenciesToProcess = array_map(function ($relativePath) {
+            return new ComposerDependency($this->path, $relativePath);
+        }, $dependenciesToPrefix);
+
+        while (!empty($dependenciesToProcess)) {
+            $dependency = array_shift($dependenciesToProcess);
+            $flatDependencyTree[$dependency->getRelativeDependencyPath()] = $dependency;
+
+            if (!$dependency->hasComposerJson()) {
+                continue;
+            }
+
+            $childDependencies = $dependency->getRequires();
+            foreach ($childDependencies as $childDep) {
+                $id = $childDep->getRelativeDependencyPath();
+
+                $alreadyProcessed = !empty($flatDependencyTree[$id]);
+                if ($alreadyProcessed
+                    || in_array($id, $dependenciesToIgnore)
+                ) {
+                    continue;
+                }
+
+                $dependenciesToProcess[] = $childDep;
+            }
+        }
+
+        return array_values($flatDependencyTree);
+    }
 }
