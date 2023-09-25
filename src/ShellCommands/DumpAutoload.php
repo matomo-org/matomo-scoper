@@ -25,7 +25,7 @@ class DumpAutoload extends ShellCommand
         $this->workingDirectory = $workingDirectory;
     }
 
-    protected function getCommand(): string
+    public function getCommand(): string
     {
         $composerPath = $this->paths->getComposerPath();
         $composerCommand = escapeshellarg($composerPath) . " --working-dir=" . escapeshellarg($this->workingDirectory)

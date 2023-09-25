@@ -2,6 +2,7 @@
 <phpunit
         colors="true"
         displayDetailsOnTestsThatTriggerWarnings="true"
+        bootstrap="tests/bootstrap.php"
 >
     <testsuites>
         <testsuite name="tests">

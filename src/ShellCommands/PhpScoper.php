@@ -46,7 +46,7 @@ class PhpScoper extends ShellCommand
         $this->renameReferences = $value;
     }
 
-    protected function getCommand(): string
+    public function getCommand(): string
     {
         $vendorPath = $this->paths->getRepoPath() . '/vendor';
         $configPath = '../scoper.inc.php';

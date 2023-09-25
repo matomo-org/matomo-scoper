@@ -19,7 +19,7 @@ abstract class ShellCommand
         $this->output = $output;
     }
 
-    protected abstract function getCommand(): string;
+    public abstract function getCommand(): string;
 
     public function passthru(): void
     {
