@@ -89,17 +89,6 @@ abstract class Prefixer
 
     private function renameReferencesToScopedDependencies(array $dependenciesToPrefix, array $namespacesToInclude): void
     {
-        // create recursive symlink to directory to trick php scoper into replacing files in-place
-        // Note: we should be using a patched php-scoper that does not delete the output directory, but in
-        // case we aren't, using this symlink approach means we won't accidentally delete the entire repo
-        // we're trying to prefix.
-        $buildPath = $this->paths->getRepoPath() . '/build';
-        if (!is_dir($buildPath)) {
-            symlink($this->paths->getRepoPath(), $buildPath);
-        } else if (!is_link($buildPath)) {
-            $this->output->writeln("<warning>  Warning: ./build dir exists and is not a symlink</warning>");
-        }
-
         // rename dependencies in rest of project
         $this->output->writeln("<info>  Scoping references in rest of project...</info>");
         $command = new PhpScoper($this->paths, $this->output, $dependenciesToPrefix, $namespacesToInclude);

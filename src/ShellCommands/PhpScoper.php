@@ -58,15 +58,17 @@ class PhpScoper extends ShellCommand
         $env = 'MATOMO_DEPENDENCIES_TO_PREFIX="' . addslashes(json_encode($this->dependenciesToPrefix)) . '" '
             . 'MATOMO_NAMESPACES_TO_PREFIX="' . addslashes(json_encode($this->namespacesToInclude)) . '"';
 
+        $extraOptions = '';
         if ($this->renameReferences) {
             $env .= " MATOMO_RENAME_REFERENCES=1";
             $vendorPath = $this->paths->getRepoPath();
-            $outputDir = './build';
+            $outputDir = '.';
             $configPath = './scoper.inc.php';
+            $extraOptions = ' --in-place';
         }
 
         $command = 'cd ' . $vendorPath . ' && ' . $env . ' ' . $phpBinary . ' ' . $phpScoper
-            . ' add --force --output-dir=' . $outputDir . ' --config=' . $configPath;
+            . ' add --force --output-dir=' . $outputDir . ' --config=' . $configPath . $extraOptions;
 
         return $command;
     }
