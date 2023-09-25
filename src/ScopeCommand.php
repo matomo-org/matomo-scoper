@@ -25,8 +25,8 @@ class ScopeCommand extends Command
 {
     const NAME = 'scope';
 
-    // using custom build for included-namespaces feature and some other changes
-    const PHP_SCOPER_URL = 'https://github.com/matomo-org/php-scoper/releases/download/included-namespaces-1/php-scoper.phar';
+    // using custom build for included-namespaces feature and some other additions
+    const PHP_SCOPER_URL = 'https://github.com/matomo-org/php-scoper/releases/download/custom-build-1/php-scoper.phar';
 
     protected function configure(): void
     {
@@ -109,7 +109,7 @@ class ScopeCommand extends Command
     {
         $outputPath = $paths->getPhpScoperPath();
         if (is_file($outputPath)) {
-            $output->writeln("Found existing phar.");
+            $output->writeln("Found existing php-scoper phar.");
             return $outputPath;
         }
 

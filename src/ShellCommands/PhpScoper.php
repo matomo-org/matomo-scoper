@@ -37,7 +37,7 @@ class PhpScoper extends ShellCommand
         $this->namespacesToInclude = $namespacesToInclude;
 
         if (empty($namespacesToInclude)) {
-            throw new \Exception("Couldn't find any namespaces to prefix, dependencies may not be supported, or something might be wrong with the prefixing process.");
+            throw new \Exception("Couldn't find any namespaces to prefix, did you forget to run 'composer install'?");
         }
     }
 
