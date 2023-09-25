@@ -24,10 +24,8 @@ use Symfony\Component\Filesystem\Filesystem;
 class ScopeCommand extends Command
 {
     const NAME = 'scope';
-    const PHP_SCOPER_VERSION = '0.18.3';
 
-    // using custom build for included-namespaces feature
-    // const PHP_SCOPER_URL = 'https://github.com/humbug/php-scoper/releases/download/' . self::PHP_SCOPER_VERSION . '/php-scoper.phar';
+    // using custom build for included-namespaces feature and some other changes
     const PHP_SCOPER_URL = 'https://github.com/matomo-org/php-scoper/releases/download/included-namespaces-1/php-scoper.phar';
 
     protected function configure(): void

@@ -36,8 +36,14 @@ class AutoloaderGenerator
 
     public function generate(): void
     {
-        // TODO: split up
+        $this->generateAutoloaderForPrefixedDeps();
+        $this->regenerateAutoloaderForUnprefixedDeps();
 
+        $this->output->writeln("Generated proxy autoload.php.");
+    }
+
+    private function generateAutoloaderForPrefixedDeps(): void
+    {
         $repoPath = $this->paths->getRepoPath();
 
         $this->output->writeln("Generating prefixed autoloader...");
@@ -51,11 +57,16 @@ class AutoloaderGenerator
         $this->filesystem->remove([$repoPath . '/vendor/prefixed/autoload.php', $repoPath . '/vendor/prefixed/composer']);
         $tempComposerJson->remove();
 
-        // remove original, unprefixed dependencies
+        // remove original folders for prefixed dependencies
         foreach ($this->prefixedDependencies as $dependency) {
             $vendorPath = $repoPath . '/vendor/' . $dependency;
             $this->filesystem->remove($vendorPath);
         }
+    }
+
+    private function regenerateAutoloaderForUnprefixedDeps()
+    {
+        $repoPath = $this->paths->getRepoPath();
 
         $this->output->writeln("Regenerating unprefixed autoloader...");
 
@@ -74,7 +85,5 @@ class AutoloaderGenerator
 
         $proxyAutoloader = new ProxyAutoloader($repoPath . '/vendor', $this->output);
         $proxyAutoloader->write();
-
-        $this->output->writeln("Generated proxy autoload.php.");
     }
 }
