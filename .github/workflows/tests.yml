@@ -1,0 +1,112 @@
+# Action for running tests
+# This file was copied from the matomo-tests.yml workflow in matomo core with the following changes:
+# - the push to branches trigger was set to just 'main'
+# - all jobs but PHP and UI were removed
+# - the following step was added after the checkout action of each job:
+# TODO
+# - the following attribute was added matomo-org/github-action-tests step
+#   setup-script: .github/scripts/run-scoper.sh
+# - the following schedule was added
+#   TODO
+# - the following extra job was added
+#   TODO (unit test build w/o matomo)
+
+name: Matomo Tests
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  push:
+    branches:
+      - 'main'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  checks: none
+  contents: read
+  deployments: none
+  issues: read
+  packages: none
+  pull-requests: read
+  repository-projects: none
+  security-events: none
+  statuses: none
+
+concurrency:
+  group: php-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  PHP:
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        type: [ 'UnitTests', 'SystemTestsPlugins', 'SystemTestsCore', 'IntegrationTestsCore', 'IntegrationTestsPlugins' ]
+        php: [ '7.2', '8.2' ]
+        adapter: [ 'PDO_MYSQL', 'MYSQLI' ]
+        exclude:
+          - php: '7.2'
+            adapter: 'MYSQLI'
+          - php: '8.2'
+            adapter: 'PDO_MYSQL'
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          lfs: false
+          persist-credentials: false
+          submodules: true
+          path: matomo
+
+      - run: >
+          git clone -q --depth 1 https://github.com/matomo-org/matomo ${{ github.workspace }}/matomo
+          cd ${{ github.workspace }}/matomo
+          git fetch -q --depth 1 origin 5.x-dev
+          git checkout FETCH_HEAD
+          git submodule update -q --init --recursive --depth 1
+          cd ${{ github.workspace }}
+
+      - name: running tests
+        uses: matomo-org/github-action-tests@main
+        with:
+          test-type: ${{ matrix.type }}
+          mysql-driver: ${{ matrix.adapter }}
+          php-version: ${{ matrix.php }}
+          redis-service: true
+          artifacts-pass: ${{ secrets.ARTIFACTS_PASS }}
+          upload-artifacts: ${{ matrix.php == '7.2' }}
+          setup-script: .github/scripts/run-scoper.sh
+  UI:
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        parts: [ 0,1,2,3 ]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          lfs: true
+          persist-credentials: false
+          submodules: true
+          path: matomo
+
+      - run: >
+          git clone -q --depth 1 https://github.com/matomo-org/matomo ${{ github.workspace }}/matomo
+          cd ${{ github.workspace }}/matomo
+          git fetch -q --depth 1 origin 5.x-dev
+          git checkout FETCH_HEAD
+          git submodule update -q --init --recursive --depth 1
+          cd ${{ github.workspace }}
+
+      - name: running tests
+        uses: matomo-org/github-action-tests@main
+        with:
+          ui-test-options: '--num-test-groups=4 --test-group=${{ matrix.parts }}'
+          test-type: 'UI'
+          php-version: '7.2'
+          node-version: '16'
+          redis-service: true
+          artifacts-pass: ${{ secrets.ARTIFACTS_PASS }}
+          upload-artifacts: true
+          setup-script: .github/scripts/run-scoper.sh
