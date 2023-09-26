@@ -36,7 +36,7 @@ class ScopeCommand extends Command
         $this->setDescription('Scope core Matomo source code or a Matomo plugin.');
         $this->addArgument('repo_path', InputArgument::OPTIONAL, 'Path to the Matomo source code or the Matomo plugin to prefix.', getcwd());
         $this->addOption('composer-path', null, InputOption::VALUE_REQUIRED,
-            'Path to composer. Required to generate a new autoloader.', getenv('COMPOSER_BINARY'));
+            'Path to composer. Required to generate a new autoloader.', getenv('COMPOSER_BINARY') ?? 'composer');
         $this->addOption('yes', 'y', InputOption::VALUE_NONE, 'Bypass confirmation.');
     }
 
@@ -98,7 +98,7 @@ class ScopeCommand extends Command
             throw new \InvalidArgumentException('The --composer-path option is required.');
         }
 
-        if (!is_file($composerPath)) {
+        if (!is_file($composerPath) && $composerPath !== 'composer' && $composerPath !== 'composer.phar') {
             throw new \InvalidArgumentException('--composer-path value "' . $composerPath . '" is not a file.');
         }
 

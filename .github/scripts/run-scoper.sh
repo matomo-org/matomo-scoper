@@ -9,4 +9,4 @@ php8.2 $(which composer) install # TODO: cache the composer directory for the ro
 
 cd matomo
 
-php8.2 ../bin/matomo-scoper scope -y --composer-path=composer .
+php8.2 ../bin/matomo-scoper scope -y .
