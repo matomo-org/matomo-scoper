@@ -59,7 +59,7 @@ jobs:
           submodules: true
           path: matomo
 
-      - run: >
+      - run: |
           git clone -q --depth 1 https://github.com/matomo-org/matomo ${{ github.workspace }}/matomo
           cd ${{ github.workspace }}/matomo
           git fetch -q --depth 1 origin 5.x-dev
@@ -91,7 +91,7 @@ jobs:
           submodules: true
           path: matomo
 
-      - run: >
+      - run: |
           git clone -q --depth 1 https://github.com/matomo-org/matomo ${{ github.workspace }}/matomo
           cd ${{ github.workspace }}/matomo
           git fetch -q --depth 1 origin 5.x-dev
