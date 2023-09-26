@@ -1,5 +1,6 @@
 # Action for running tests
 # This file was copied from the matomo-tests.yml workflow in matomo core with the following changes:
+# - the path in the actions/checkout steps were removed
 # - the push to branches trigger was set to just 'main'
 # - all jobs but PHP and UI were removed
 # - the following step was added after the checkout action of each job:
@@ -57,7 +58,6 @@ jobs:
           lfs: false
           persist-credentials: false
           submodules: true
-          path: matomo
 
       - run: |
           git clone -q --depth 1 https://github.com/matomo-org/matomo ${{ github.workspace }}/matomo
@@ -89,7 +89,6 @@ jobs:
           lfs: true
           persist-credentials: false
           submodules: true
-          path: matomo
 
       - run: |
           git clone -q --depth 1 https://github.com/matomo-org/matomo ${{ github.workspace }}/matomo
