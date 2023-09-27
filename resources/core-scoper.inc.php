@@ -36,6 +36,12 @@ if ($isRenamingReferences) {
             ->notName('*.ini.php')
             ->notPath('%^tests/PHPUnit/proxy/console$%')
             ->notPath('%^console$%')
+
+            // prefixing will change the line number of an exception and break the test, so we'll just skip it
+            ->notPath('%^plugins/Monolog/tests/Unit/Processor/ExceptionToTextProcessorTest\\.php$%')
+            ->notPath('%^tests/PHPUnit/System/ConsoleTest\\.php$%')
+            ->notPath('%^tests/PHPUnit/System/FrontControllerTest\\.php$%')
+
             ->filter(function (\SplFileInfo $file) {
                 return !($file->isLink() && $file->isDir());
             })
@@ -122,6 +128,7 @@ return [
             if (preg_match('%symfony/string/AbstractString\\.php$%', $filePath)
                 || preg_match('%symfony/string/AbstractUnicodeString\\.php$%', $filePath)
                 || preg_match('%plugins/ImageGraph/StaticGraph\\.php$%', $filePath)
+                || preg_match('%symfony/polyfill-intl-normalizer/Resources/unidata/compatibilityDecomposition\\.php$%', $filePath)
             ) {
                 $content = str_replace(' ', "\\xC2\\xA0", $content);
             }
