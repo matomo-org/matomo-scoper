@@ -146,7 +146,7 @@ return [
 
             // disable the OneClickUpdate test since it's expected it can't work (as the downloaded Matomo will not be prefixed)
             if ($isRenamingReferences && $filePath === __DIR__ . '/tests/UI/specs/OneClickUpdate_spec.js') {
-                $content = str_replace('describe("OneClickUpdate"', 'describe.skip("OneClickUpdate"', $content);
+                $content = str_replace('it(', 'it.skip(', $content);
             }
 
             return $content;
