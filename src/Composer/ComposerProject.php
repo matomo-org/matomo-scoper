@@ -121,7 +121,7 @@ class ComposerProject
                 }
 
                 $tempUnprefixedPath = $vendorPath . $folder . '/' . $subfolder;
-                $this->filesystem->remove([$tempUnprefixedPath, $vendorPath . $folder]);
+                $this->filesystem->remove($tempUnprefixedPath);
             }
         }
     }
