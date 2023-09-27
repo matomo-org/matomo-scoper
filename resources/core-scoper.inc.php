@@ -34,6 +34,8 @@ if ($isRenamingReferences) {
             ->exclude('js')
             ->exclude('lang')
             ->notName('*.ini.php')
+            ->notPath('%^tests/PHPUnit/proxy/console$%')
+            ->notPath('%^console$%')
             ->filter(function (\SplFileInfo $file) {
                 return !($file->isLink() && $file->isDir());
             })
@@ -110,6 +112,18 @@ return [
 
             if (preg_match('/^<\\?php\s+$/', $content)) {
                 $content = '<?php return [];';
+            }
+
+            return $content;
+        },
+
+        // some control character sequences are not escaped properly by php-parser (and ReleaseChecklistTest complains)
+        static function (string $filePath, string $prefix, string $content) use ($isRenamingReferences): string {
+            if (preg_match('%symfony/string/AbstractString\\.php$%', $filePath)
+                || preg_match('%symfony/string/AbstractUnicodeString\\.php$%', $filePath)
+                || preg_match('%plugins/ImageGraph/StaticGraph\\.php$%', $filePath)
+            ) {
+                $content = str_replace(' ', "\\xC2\\xA0", $content);
             }
 
             return $content;

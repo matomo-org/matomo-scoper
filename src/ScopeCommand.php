@@ -26,7 +26,7 @@ class ScopeCommand extends Command
     const NAME = 'scope';
 
     // using custom build for included-namespaces feature and some other additions
-    const PHP_SCOPER_URL = 'https://github.com/matomo-org/php-scoper/releases/download/custom-build-1/php-scoper.phar';
+    const PHP_SCOPER_URL = 'https://github.com/matomo-org/php-scoper/releases/download/custom-build-2/php-scoper.phar';
 
     protected function configure(): void
     {
