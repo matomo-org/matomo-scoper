@@ -36,11 +36,13 @@ if ($isRenamingReferences) {
             ->notName('*.ini.php')
             ->notPath('%^tests/PHPUnit/proxy/console$%')
             ->notPath('%^console$%')
+            ->notPath('%^tests/javascript/index.php$%')
 
             // prefixing will change the line number of an exception and break the test, so we'll just skip it
             ->notPath('%^plugins/Monolog/tests/Unit/Processor/ExceptionToTextProcessorTest\\.php$%')
             ->notPath('%^tests/PHPUnit/System/ConsoleTest\\.php$%')
             ->notPath('%^tests/PHPUnit/System/FrontControllerTest\\.php$%')
+            ->notPath('%^tests/resources/trigger-fatal\\.php$%')
 
             ->filter(function (\SplFileInfo $file) {
                 return !($file->isLink() && $file->isDir());
@@ -130,9 +132,17 @@ return [
                 || preg_match('%plugins/ImageGraph/StaticGraph\\.php$%', $filePath)
                 || preg_match('%symfony/polyfill-intl-normalizer/Resources/unidata/compatibilityDecomposition\\.php$%', $filePath)
             ) {
-                $content = str_replace(' ', "\\xC2\\xA0", $content);
+                $content = str_replace(html_entity_decode('&nbsp;'), "\\xC2\\xA0", $content);
             }
 
+            return $content;
+        },
+
+        // test related patchers
+        static function (string $filePath, string $prefix, string $content) use ($isRenamingReferences): string {
+            if ($isRenamingReferences && $filePath === __DIR__ . '/index.php') {
+                $content = str_replace("\\define('PIWIK_PRINT_ERROR_BACKTRACE', \\false);", "define('PIWIK_PRINT_ERROR_BACKTRACE', false);", $content);
+            }
             return $content;
         },
     ],
