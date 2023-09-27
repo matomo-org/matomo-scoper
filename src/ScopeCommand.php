@@ -33,7 +33,7 @@ class ScopeCommand extends Command
         parent::configure();
 
         $this->setName(self::NAME);
-        $this->setDescription('Scope core Matomo source code or a Matomo plugin.');
+        $this->setDescription('Prefix namespaces for core Matomo source code or a Matomo plugin.');
         $this->addArgument('repo_path', InputArgument::OPTIONAL, 'Path to the Matomo source code or the Matomo plugin to prefix.', getcwd());
         $this->addOption('composer-path', null, InputOption::VALUE_REQUIRED,
             'Path to composer. Required to generate a new autoloader.', getenv('COMPOSER_BINARY') ?: 'composer');
