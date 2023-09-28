@@ -1,4 +1,5 @@
-# Action for running tests
+# Action for running core Matomo tests
+#
 # This file was copied from the matomo-tests.yml workflow in matomo core with the following changes:
 # - the name of the suite was changed to "Matomo Core Tests"
 # - the path in the actions/checkout steps were removed
@@ -46,7 +47,7 @@ permissions:
   statuses: none
 
 concurrency:
-  group: php-${{ github.ref }}
+  group: core-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
