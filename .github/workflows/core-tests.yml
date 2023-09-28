@@ -1,5 +1,6 @@
 # Action for running tests
 # This file was copied from the matomo-tests.yml workflow in matomo core with the following changes:
+# - the name of the suite was changed to "Matomo Core Tests"
 # - the path in the actions/checkout steps were removed
 # - the push to branches trigger was set to just 'main'
 # - all jobs but PHP and UI were removed
@@ -17,9 +18,8 @@
 #   setup-script: .github/scripts/run-scoper.sh
 # - the following schedule was added
 #   TODO
-# - the ScoperUnit job was added to run the matomo-scoper unit tests
 
-name: Matomo Tests
+name: Matomo Core Tests
 
 on:
   pull_request:
@@ -116,37 +116,3 @@ jobs:
           artifacts-pass: ${{ secrets.ARTIFACTS_PASS }}
           upload-artifacts: true
           setup-script: .github/scripts/run-scoper.sh
-
-  ScoperUnit:
-    runs-on: ubuntu-20.04
-    strategy:
-      fail-fast: true
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          lfs: true
-          persist-credentials: false
-          submodules: true
-
-      # TODO setup php, composer install w/ cache, run tests
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: 8.2
-          tools: composer:v2
-          coverage: none
-
-      - name: Get composer cache directory
-        id: composer-cache
-        shell: bash
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-        working-directory: ${{ github.workspace }}
-      - name: Cache dependencies
-        uses: actions/cache@v3
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-scoper-${{ hashFiles('**/composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-scoper
-
-      - run: composer install
-      - run: composer run test
