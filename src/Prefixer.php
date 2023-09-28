@@ -58,7 +58,15 @@ abstract class Prefixer
     {
         $vendorPath = $this->paths->getRepoPath() . '/vendor/';
         foreach ($dependenciesToPrefix as $dependencyPath) {
-            $this->filesystem->remove([$vendorPath . $dependencyPath, dirname($vendorPath . $dependencyPath)]);
+            $this->filesystem->remove([$vendorPath . $dependencyPath]);
+
+            $orgPath = dirname($vendorPath . $dependencyPath);
+
+            $orgPathContents = scandir($orgPath);
+            $orgPathContents = array_filter($orgPathContents, function ($c) { return $c !== '.' && $c !== '..'; });
+            if (empty($orgPathContents)) {
+                $this->filesystem->remove([$orgPath]);
+            }
         }
     }
 

@@ -27,9 +27,11 @@ class PhpScoperTest extends TestCase
         $namespacesEnvVar = addslashes(json_encode($namespacesToPrefix));
         $libDir = MATOMO_SCOPER_ROOT_PATH;
 
+        $phpBinary = PHP_BINARY;
+
         $actual = $command->getCommand();
         $expected = <<<CMD
-cd /path/to/matomo/vendor && MATOMO_DEPENDENCIES_TO_PREFIX="$dependenciesEnvVar" MATOMO_NAMESPACES_TO_PREFIX="$namespacesEnvVar" /usr/bin/php8.1 $libDir/php-scoper.phar add --force --output-dir=./prefixed/ --config=../scoper.inc.php
+cd /path/to/matomo/vendor && MATOMO_DEPENDENCIES_TO_PREFIX="$dependenciesEnvVar" MATOMO_NAMESPACES_TO_PREFIX="$namespacesEnvVar" $phpBinary $libDir/php-scoper.phar add --force --output-dir=./prefixed/ --config=../scoper.inc.php
 CMD;
 
         $this->assertEquals($expected, $actual);
@@ -48,9 +50,11 @@ CMD;
         $namespacesEnvVar = addslashes(json_encode($namespacesToPrefix));
         $libDir = MATOMO_SCOPER_ROOT_PATH;
 
+        $phpBinary = PHP_BINARY;
+
         $actual = $command->getCommand();
         $expected = <<<CMD
-cd /path/to/matomo && MATOMO_DEPENDENCIES_TO_PREFIX="$dependenciesEnvVar" MATOMO_NAMESPACES_TO_PREFIX="$namespacesEnvVar" MATOMO_RENAME_REFERENCES=1 /usr/bin/php8.1 $libDir/php-scoper.phar add --force --output-dir=. --config=./scoper.inc.php --in-place
+cd /path/to/matomo && MATOMO_DEPENDENCIES_TO_PREFIX="$dependenciesEnvVar" MATOMO_NAMESPACES_TO_PREFIX="$namespacesEnvVar" MATOMO_RENAME_REFERENCES=1 $phpBinary $libDir/php-scoper.phar add --force --output-dir=. --config=./scoper.inc.php --in-place
 CMD;
 
         $this->assertEquals($expected, $actual);

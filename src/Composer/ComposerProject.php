@@ -43,13 +43,15 @@ class ComposerProject
 
         $autoloadFiles = preg_split('/[,()\[\]]+\s*/', $autoloadFiles);
         foreach ($autoloadFiles as $key => $line) {
-            if (!preg_match("/'\/..'\s+\.\s+'(.*?)'/", $line, $matches)) {
+            if (!preg_match("/'(?:\/..)+'\s+\.\s+'(.*?)'/", $line, $matches)) {
                 unset($autoloadFiles[$key]);
                 continue;
             }
 
             $relativePath = $matches[1];
-            if (!$this->filesystem->exists($this->path . '/vendor' . $relativePath)) { // dependency was prefixed
+            if (!$this->filesystem->exists($this->path . '/vendor' . $relativePath)
+                && !$this->filesystem->exists($this->path . $relativePath)
+            ) { // dependency was prefixed
                 unset($autoloadFiles[$key]);
             }
         }
@@ -121,7 +123,7 @@ class ComposerProject
                 }
 
                 $tempUnprefixedPath = $vendorPath . $folder . '/' . $subfolder;
-                $this->filesystem->remove([$tempUnprefixedPath, $vendorPath . $folder]);
+                $this->filesystem->remove($tempUnprefixedPath);
             }
         }
     }

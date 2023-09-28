@@ -122,6 +122,7 @@ class ComposerProjectTest extends ComposerTestCase
     {
         $rootPath = $this->setUpTestProject([], ['mustangostang/spyc', 'lox/asdkjlf', 'szymach/c-pchart'], []);
 
+        $this->putTestProjectFile('LegacyAutoloader.php', '<?php # test');
         $this->putTestProjectFile('vendor/mustangostang/spyc/Spyc.php', 'TEST');
         $this->putTestProjectFile('vendor/szymach/c-pchart/constants.php', 'TEST');
         $this->putTestProjectFile('vendor/lox/xhprof/xhprof_lib/utils/xhprof_runs.php', 'TEST');
@@ -143,6 +144,7 @@ class ComposerProjectTest extends ComposerTestCase
                     '8ac259e46781d60665439a97846a4a66' => __DIR__ . '/..' . '/lox/xhprof/xhprof_lib/utils/xhprof_lib.php',
                     'e30869f87cf76d235b75bb956c7ba9ed' => __DIR__ . '/..' . '/lox/xhprof/xhprof_lib/utils/xhprof_runs.php',
                     '7bb4f001eb5212bde073bf47a4bbedad' => __DIR__ . '/..' . '/szymach/c-pchart/constants.php',
+                    'c03755bd507301ecda84f959218be302' => __DIR__ . '/../..' . '/LegacyAutoloader.php',
                 ];
             
             
@@ -164,7 +166,8 @@ class ComposerProjectTest extends ComposerTestCase
         public static \$files = array(
         '04c6c5c2f7095ccf6c481d3e53e1776f' => __DIR__ . '/..' . '/mustangostang/spyc/Spyc.php',
         'e30869f87cf76d235b75bb956c7ba9ed' => __DIR__ . '/..' . '/lox/xhprof/xhprof_lib/utils/xhprof_runs.php',
-        '7bb4f001eb5212bde073bf47a4bbedad' => __DIR__ . '/..' . '/szymach/c-pchart/constants.php');
+        '7bb4f001eb5212bde073bf47a4bbedad' => __DIR__ . '/..' . '/szymach/c-pchart/constants.php',
+        'c03755bd507301ecda84f959218be302' => __DIR__ . '/../..' . '/LegacyAutoloader.php');
         EOF;
 
         $this->assertEquals(
@@ -317,6 +320,7 @@ class ComposerProjectTest extends ComposerTestCase
         $this->assertEquals([
             '/composer.json',
             '/vendor',
+            '/vendor/lox',
             '/vendor/mustangostang',
             '/vendor/mustangostang/spyc',
             '/vendor/mustangostang/spyc/composer.json',
@@ -327,6 +331,7 @@ class ComposerProjectTest extends ComposerTestCase
             '/vendor/prefixed/szymach',
             '/vendor/prefixed/szymach/c-pchart',
             '/vendor/prefixed/szymach/c-pchart/composer.json',
+            '/vendor/szymach',
         ], $allFiles);
     }
 
@@ -412,6 +417,7 @@ class ComposerProjectTest extends ComposerTestCase
                     '8ac259e46781d60665439a97846a4a66' => __DIR__ . '/..' . '/lox/xhprof/xhprof_lib/utils/xhprof_lib.php',
                     'e30869f87cf76d235b75bb956c7ba9ed' => __DIR__ . '/..' . '/lox/xhprof/xhprof_lib/utils/xhprof_runs.php',
                     '7bb4f001eb5212bde073bf47a4bbedad' => __DIR__ . '/..' . '/szymach/c-pchart/constants.php',
+                    'c03755bd507301ecda84f959218be302' => __DIR__ . '/../..' . '/LegacyAutoloader.php',
                 );
             
                 public static \$prefixLengthsPsr4 = array (

@@ -26,17 +26,17 @@ class ScopeCommand extends Command
     const NAME = 'scope';
 
     // using custom build for included-namespaces feature and some other additions
-    const PHP_SCOPER_URL = 'https://github.com/matomo-org/php-scoper/releases/download/custom-build-1/php-scoper.phar';
+    const PHP_SCOPER_URL = 'https://github.com/matomo-org/php-scoper/releases/download/custom-build-2/php-scoper.phar';
 
     protected function configure(): void
     {
         parent::configure();
 
         $this->setName(self::NAME);
-        $this->setDescription('Scope core Matomo source code or a Matomo plugin.');
+        $this->setDescription('Prefix namespaces for core Matomo source code or a Matomo plugin.');
         $this->addArgument('repo_path', InputArgument::OPTIONAL, 'Path to the Matomo source code or the Matomo plugin to prefix.', getcwd());
         $this->addOption('composer-path', null, InputOption::VALUE_REQUIRED,
-            'Path to composer. Required to generate a new autoloader.', getenv('COMPOSER_BINARY'));
+            'Path to composer. Required to generate a new autoloader.', getenv('COMPOSER_BINARY') ?: 'composer');
         $this->addOption('yes', 'y', InputOption::VALUE_NONE, 'Bypass confirmation.');
     }
 
@@ -98,7 +98,7 @@ class ScopeCommand extends Command
             throw new \InvalidArgumentException('The --composer-path option is required.');
         }
 
-        if (!is_file($composerPath)) {
+        if (!is_file($composerPath) && $composerPath !== 'composer' && $composerPath !== 'composer.phar') {
             throw new \InvalidArgumentException('--composer-path value "' . $composerPath . '" is not a file.');
         }
 
