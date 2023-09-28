@@ -140,12 +140,18 @@ return [
 
         // test related patchers
         static function (string $filePath, string $prefix, string $content) use ($isRenamingReferences): string {
-            if ($isRenamingReferences && $filePath === __DIR__ . '/index.php') { // for ReleaseCheckListTest.php
+            if (!$isRenamingReferences) {
+                return $content;
+            }
+
+            if ($filePath === __DIR__ . '/index.php') { // for ReleaseCheckListTest.php
                 $content = str_replace("\\define('PIWIK_PRINT_ERROR_BACKTRACE', \\false);", "define('PIWIK_PRINT_ERROR_BACKTRACE', false);", $content);
             }
 
             // disable the OneClickUpdate test since it's expected it can't work (as the downloaded Matomo will not be prefixed)
-            if ($isRenamingReferences && $filePath === __DIR__ . '/tests/UI/specs/OneClickUpdate_spec.js') {
+            if ($filePath === __DIR__ . '/tests/UI/specs/OneClickUpdate_spec.js'
+                || $filePath === __DIR__ . '/tests/UI/specs/OneClickLastForcedUpdate_spec.js'
+            ) {
                 $content = str_replace('it(', 'it.skip(', $content);
             }
 
