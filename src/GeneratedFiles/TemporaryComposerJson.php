@@ -8,7 +8,8 @@
 
 namespace Matomo\Scoper\GeneratedFiles;
 
-use Matomo\Scoper\Composer\ComposerDependency;
+use Matomo\Scoper\Composer\ComposerJson;
+use Matomo\Scoper\Composer\ComposerProject;
 use Matomo\Scoper\GeneratedFile;
 
 /**
@@ -16,21 +17,10 @@ use Matomo\Scoper\GeneratedFile;
  */
 class TemporaryComposerJson extends GeneratedFile
 {
-    /**
-     * @var string
-     */
-    private string $repoPath;
 
-    /**
-     * @var string[]
-     */
-    private array $prefixedDependencies;
-
-    public function __construct(string $repoPath, array $prefixedDependencies)
+    public function __construct(private readonly array $prefixedDependencies, private readonly ComposerProject $composerProject)
     {
-        parent::__construct($repoPath . '/vendor/prefixed/composer.json');
-        $this->repoPath = $repoPath;
-        $this->prefixedDependencies = $prefixedDependencies;
+        parent::__construct($this->composerProject->getPath() . '/vendor/prefixed/composer.json');
     }
 
     public function getContent(): ?string
@@ -47,8 +37,8 @@ class TemporaryComposerJson extends GeneratedFile
     {
         $files = [];
         foreach ($this->prefixedDependencies as $dependencyPath) {
-            $dependency = new ComposerDependency($this->repoPath, 'prefixed/' . $dependencyPath);
-            if (!$dependency->hasComposerJson()) {
+            $dependency = $this->composerProject->getDependency($dependencyPath);
+            if (!$dependency) {
                 continue;
             }
 

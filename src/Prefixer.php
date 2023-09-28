@@ -8,7 +8,7 @@
 
 namespace Matomo\Scoper;
 
-use Matomo\Scoper\Composer\ComposerDependency;
+use Matomo\Scoper\Composer\ComposerJson;
 use Matomo\Scoper\Composer\ComposerProject;
 use Matomo\Scoper\ShellCommands\PhpScoper;
 use Matomo\Scoper\Utilities\Paths;
@@ -17,11 +17,7 @@ use Symfony\Component\Filesystem\Filesystem;
 
 abstract class Prefixer
 {
-    protected Paths $paths;
-
-    protected Filesystem $filesystem;
-
-    protected OutputInterface $output;
+    protected readonly ComposerProject $composerProject;
 
     /**
      * @var ?string[]
@@ -33,11 +29,9 @@ abstract class Prefixer
      */
     protected array $dependenciesToIgnore = [];
 
-    public function __construct(Paths $paths, Filesystem $filesystem, OutputInterface $output)
+    public function __construct(protected readonly Paths $paths, protected readonly Filesystem $filesystem, protected readonly OutputInterface $output)
     {
-        $this->paths = $paths;
-        $this->filesystem = $filesystem;
-        $this->output = $output;
+        $this->composerProject = new ComposerProject($this->paths->getRepoPath(), $this->filesystem);
     }
 
     public function run(): array
@@ -72,14 +66,13 @@ abstract class Prefixer
 
     private function collectChildDependencies(): array
     {
-        $composerProject = new ComposerProject($this->paths->getRepoPath(), $this->filesystem);
-        $allDependencies = $composerProject->getFlatDependencyTreeFor($this->dependenciesToPrefix, $this->dependenciesToIgnore);
+        $allDependencies = $this->composerProject->getComposerLock()->getFlatDependencyTreeFor($this->dependenciesToPrefix, $this->dependenciesToIgnore);
 
         $allDependenciesToPrefix = [];
         $allNamespacesToInclude = [];
 
         foreach ($allDependencies as $dependency) {
-            $allDependenciesToPrefix[] = $dependency->getRelativeDependencyPath();
+            $allDependenciesToPrefix[] = $dependency->getName();
             $allNamespacesToInclude = array_merge($allNamespacesToInclude, $dependency->getNamespaces());
         }
 
@@ -89,6 +82,7 @@ abstract class Prefixer
     private function scopeDependencies(array $dependenciesToPrefix, array $namespacesToInclude): void
     {
         $this->output->writeln("<info>  Scoping vendor...</info>");
+
         $command = new PhpScoper($this->paths, $this->output, $dependenciesToPrefix, $namespacesToInclude);
         $command->passthru();
 

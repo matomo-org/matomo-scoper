@@ -18,20 +18,16 @@ use Symfony\Component\Filesystem\Filesystem;
 
 class AutoloaderGenerator
 {
-    private Paths $paths;
+    private readonly ComposerProject $composerProject;
 
-    private Filesystem $filesystem;
-
-    private OutputInterface $output;
-
-    private array $prefixedDependencies;
-
-    public function __construct(Paths $paths, Filesystem $filesystem, OutputInterface $output, array $prefixedDependencies)
+    public function __construct(
+        private readonly Paths $paths,
+        private readonly Filesystem $filesystem,
+        private readonly OutputInterface $output,
+        private readonly array $prefixedDependencies,
+    )
     {
-        $this->paths = $paths;
-        $this->filesystem = $filesystem;
-        $this->output = $output;
-        $this->prefixedDependencies = $prefixedDependencies;
+        $this->composerProject = new ComposerProject($paths->getRepoPath(), $this->filesystem);
     }
 
     public function generate(): void
@@ -47,7 +43,7 @@ class AutoloaderGenerator
         $repoPath = $this->paths->getRepoPath();
 
         $this->output->writeln("Generating prefixed autoloader...");
-        $tempComposerJson = new TemporaryComposerJson($repoPath, $this->prefixedDependencies);
+        $tempComposerJson = new TemporaryComposerJson($this->prefixedDependencies, $this->composerProject);
         $tempComposerJson->write();
 
         $dumpAutoload = new DumpAutoload($this->paths, $this->output, $repoPath . '/vendor/prefixed');
@@ -70,18 +66,17 @@ class AutoloaderGenerator
 
         $this->output->writeln("Regenerating unprefixed autoloader...");
 
-        $composerProject = new ComposerProject($repoPath, $this->filesystem);
-        $unprefixedAutoloadFiles = $composerProject->getUnprefixedAutoloadFiles();
-        $composerProject->createDummyComposerJsonFilesForPrefixedDeps();
+        $unprefixedAutoloadFiles = $this->composerProject->getUnprefixedAutoloadFiles();
+        $this->composerProject->createDummyComposerJsonFilesForPrefixedDeps();
 
         try {
             $regenerateUnprefixedAutload = new DumpAutoload($this->paths, $this->output, $repoPath);
             $regenerateUnprefixedAutload->passthru();;
         } finally {
-            $composerProject->removeDummyComposerJsonFilesForPrefixedDeps();
+            $this->composerProject->removeDummyComposerJsonFilesForPrefixedDeps();
         }
 
-        $composerProject->replaceStaticAutoloadFiles($unprefixedAutoloadFiles);
+        $this->composerProject->replaceStaticAutoloadFiles($unprefixedAutoloadFiles);
 
         $proxyAutoloader = new ProxyAutoloader($repoPath . '/vendor', $this->output);
         $proxyAutoloader->write();

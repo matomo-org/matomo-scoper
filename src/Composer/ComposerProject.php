@@ -12,11 +12,29 @@ use Symfony\Component\Filesystem\Filesystem;
 
 class ComposerProject
 {
-    public function __construct(private readonly string $path, private readonly Filesystem $filesystem) {}
+    private ComposerLock $composerLock;
+
+    private ComposerJson $composerJson;
+
+    public function __construct(private readonly string $path, private readonly Filesystem $filesystem)
+    {
+        $this->composerLock = new ComposerLock($this->readFile($path . '/composer.lock'));
+        $this->composerJson = new ComposerJson($this->readFile($path . '/composer.json'));
+    }
+
+    public function getPath(): string
+    {
+        return $this->path;
+    }
 
     public function getComposerJson(): ComposerJson
     {
-        return new ComposerJson($this->path . '/composer.json');
+        return $this->composerJson;
+    }
+
+    public function getComposerLock(): ComposerLock
+    {
+        return $this->composerLock;
     }
 
     /**
@@ -80,21 +98,21 @@ class ComposerProject
                     continue;
                 }
 
-                $dependency = new ComposerDependency($this->path, 'prefixed/' . $folder . '/' . $subfolder);
-                if (!$dependency->hasComposerJson()) {
+                $dependency = $this->getDependency($folder . '/' . $subfolder);
+                if (!$dependency) {
                     continue;
                 }
 
                 $composerJsonContents = $dependency->getComposerJsonContents();
 
-                $autoload = $composerJsonContents['autoload'];
+                $autoload = $composerJsonContents['autoload'] ?? [];
                 unset($composerJsonContents['autoload']);
 
-                $unprefixedDependency = new ComposerDependency($this->path, $folder . '/' . $subfolder);
-                $unprefixedDependency->writeComposerJsonContents($composerJsonContents);
+                $dependency->setComposerJsonContents($composerJsonContents);
+                $dependency->writeTo(sprintf('%s/%s/%s/composer.json', $this->path, $folder, $subfolder, 'composer.json'));
 
                 foreach ($autoload['classmap'] ?? [] as $classmapFolder) {
-                    mkdir($unprefixedDependency->getDependencyPath() . '/' . $classmapFolder, 0777, true);
+                    mkdir($this->path . '/vendor/' . $dependency->getName() . '/' . $classmapFolder, 0777, true);
                 }
             }
         }
@@ -142,42 +160,17 @@ class ComposerProject
         return $this->path . '/vendor/composer/autoload_static.php';
     }
 
-    /**
-     * @param string[] $dependenciesToPrefix
-     * @param string[] $dependenciesToIgnore
-     * @return ComposerDependency[]
-     */
-    public function getFlatDependencyTreeFor(array $dependenciesToPrefix, array $dependenciesToIgnore = []): array
+    public function getDependency(string $dependencyName): ?ComposerJson
     {
-        $flatDependencyTree = [];
+        return $this->composerLock->getDependency($dependencyName);
+    }
 
-        $dependenciesToProcess = array_map(function ($relativePath) {
-            return new ComposerDependency($this->path, $relativePath);
-        }, $dependenciesToPrefix);
-
-        while (!empty($dependenciesToProcess)) {
-            $dependency = array_shift($dependenciesToProcess);
-            $flatDependencyTree[$dependency->getRelativeDependencyPath()] = $dependency;
-
-            if (!$dependency->hasComposerJson()) {
-                continue;
-            }
-
-            $childDependencies = $dependency->getRequires();
-            foreach ($childDependencies as $childDep) {
-                $id = $childDep->getRelativeDependencyPath();
-
-                $alreadyProcessed = !empty($flatDependencyTree[$id]);
-                if ($alreadyProcessed
-                    || in_array($id, $dependenciesToIgnore)
-                ) {
-                    continue;
-                }
-
-                $dependenciesToProcess[] = $childDep;
-            }
+    private function readFile(string $path): array
+    {
+        if (!is_file($path)) {
+            throw new \Exception('Cannot open composer file at ' . $path);
         }
 
-        return array_values($flatDependencyTree);
+        return json_decode(file_get_contents($path), true);
     }
 }

@@ -8,7 +8,7 @@
 
 namespace Matomo\Scoper\Tests\Composer;
 
-use Matomo\Scoper\Composer\ComposerDependency;
+use Matomo\Scoper\Composer\ComposerJson;
 use Matomo\Scoper\Tests\Framework\ComposerTestCase;
 
 class ComposerDependencyTest extends ComposerTestCase
@@ -19,7 +19,7 @@ class ComposerDependencyTest extends ComposerTestCase
     {
         $rootPath = $this->setUpTestProject(null, [self::TEST_DEPENDENCY], []);
 
-        $dependency = new ComposerDependency($rootPath, self::TEST_DEPENDENCY);
+        $dependency = new ComposerJson($rootPath, self::TEST_DEPENDENCY);
         $this->assertFalse($dependency->hasComposerJson());
     }
 
@@ -27,7 +27,7 @@ class ComposerDependencyTest extends ComposerTestCase
     {
         $rootPath = $this->setUpTestProject(null, [self::TEST_DEPENDENCY], null);
 
-        $dependency = new ComposerDependency($rootPath, self::TEST_DEPENDENCY);
+        $dependency = new ComposerJson($rootPath, self::TEST_DEPENDENCY);
         $this->assertFalse($dependency->hasComposerJson());
     }
 
@@ -40,7 +40,7 @@ class ComposerDependencyTest extends ComposerTestCase
 
         file_put_contents($composerJsonPath, '{}');
 
-        $dependency = new ComposerDependency($rootPath, self::TEST_DEPENDENCY);
+        $dependency = new ComposerJson($rootPath, self::TEST_DEPENDENCY);
         $this->assertTrue($dependency->hasComposerJson());
     }
 
@@ -48,7 +48,7 @@ class ComposerDependencyTest extends ComposerTestCase
     {
         $rootPath = $this->setUpTestProject(null, [self::TEST_DEPENDENCY], null);
 
-        $dependency = new ComposerDependency($rootPath, self::TEST_DEPENDENCY);
+        $dependency = new ComposerJson($rootPath, self::TEST_DEPENDENCY);
         $this->assertEquals($rootPath . '/vendor/' . self::TEST_DEPENDENCY, $dependency->getDependencyPath());
     }
 
@@ -58,7 +58,7 @@ class ComposerDependencyTest extends ComposerTestCase
 
         $rootComposerJson = $rootPath . '/vendor/' . self::TEST_DEPENDENCY . '/composer.json';
 
-        $dependency = new ComposerDependency($rootPath, self::TEST_DEPENDENCY);
+        $dependency = new ComposerJson($rootPath, self::TEST_DEPENDENCY);
         $this->assertEquals(['test' => 'value'], $dependency->getComposerJsonContents());
 
         $dependency->writeComposerJsonContents(['this' => 'that']);
@@ -78,7 +78,7 @@ class ComposerDependencyTest extends ComposerTestCase
 
         $rootComposerJson = $rootPath . '/vendor/' . self::TEST_DEPENDENCY . '/composer.json';
 
-        $dependency = new ComposerDependency($rootPath, self::TEST_DEPENDENCY);
+        $dependency = new ComposerJson($rootPath, self::TEST_DEPENDENCY);
 
         $this->assertFalse(is_file($rootComposerJson));
 
@@ -92,21 +92,21 @@ class ComposerDependencyTest extends ComposerTestCase
     public function test_getComposerJsonPath_returnsNull_ifNoComposerJsonPathExists()
     {
         $rootPath = $this->setUpTestProject(null, [self::TEST_DEPENDENCY], null);
-        $dependency = new ComposerDependency($rootPath, self::TEST_DEPENDENCY);
+        $dependency = new ComposerJson($rootPath, self::TEST_DEPENDENCY);
         $this->assertNull($dependency->getComposerJsonPath());
     }
 
     public function test_getComposerJsonPath_returnsNull_ifDependencyFolderDoesNotExist()
     {
         $this->assertFalse(is_dir($this->getTestProjectRootPath() . '/vendor/test/test'));
-        $dependency = new ComposerDependency($this->getTestProjectRootPath(), 'test/test');
+        $dependency = new ComposerJson($this->getTestProjectRootPath(), 'test/test');
         $this->assertNull($dependency->getComposerJsonPath());
     }
 
     public function test_getComposerJsonPath_returnsPath_ifRootComposerJsonExists()
     {
         $rootPath = $this->setUpTestProject(null, [self::TEST_DEPENDENCY], ['test' => 'value']);
-        $dependency = new ComposerDependency($rootPath, self::TEST_DEPENDENCY);
+        $dependency = new ComposerJson($rootPath, self::TEST_DEPENDENCY);
         $this->assertEquals($rootPath . '/vendor/' . self::TEST_DEPENDENCY . '/composer.json', $dependency->getComposerJsonPath());
     }
 
@@ -120,7 +120,7 @@ class ComposerDependencyTest extends ComposerTestCase
 
         $this->assertFalse(is_file($rootPath . '/vendor/' . self::TEST_DEPENDENCY . '/composer.json'));
 
-        $dependency = new ComposerDependency($rootPath, self::TEST_DEPENDENCY);
+        $dependency = new ComposerJson($rootPath, self::TEST_DEPENDENCY);
         $this->assertEquals($composerJsonPath, $dependency->getComposerJsonPath());
     }
 
@@ -137,7 +137,7 @@ class ComposerDependencyTest extends ComposerTestCase
 
         $this->assertFalse(is_file($rootPath . '/vendor/' . self::TEST_DEPENDENCY . '/composer.json'));
 
-        $dependency = new ComposerDependency($rootPath, self::TEST_DEPENDENCY);
+        $dependency = new ComposerJson($rootPath, self::TEST_DEPENDENCY);
         $this->assertNull($dependency->getComposerJsonPath());
     }
 
@@ -145,7 +145,7 @@ class ComposerDependencyTest extends ComposerTestCase
     {
         $rootPath = $this->setUpTestProject(null, [self::TEST_DEPENDENCY], ['name' => 'project']);
 
-        $dependency = new ComposerDependency($rootPath, self::TEST_DEPENDENCY);
+        $dependency = new ComposerJson($rootPath, self::TEST_DEPENDENCY);
         $this->assertEquals([], $dependency->getNamespaces());
     }
 
@@ -161,7 +161,7 @@ class ComposerDependencyTest extends ComposerTestCase
             ],
         ]);
 
-        $dependency = new ComposerDependency($rootPath, self::TEST_DEPENDENCY);
+        $dependency = new ComposerJson($rootPath, self::TEST_DEPENDENCY);
         $this->assertEquals(['Monolog\\', 'Vendor\\Namespace\\'], $dependency->getNamespaces());
     }
 
@@ -178,7 +178,7 @@ class ComposerDependencyTest extends ComposerTestCase
             ],
         ]);
 
-        $dependency = new ComposerDependency($rootPath, self::TEST_DEPENDENCY);
+        $dependency = new ComposerJson($rootPath, self::TEST_DEPENDENCY);
         $this->assertEquals(['Monolog2\\', 'Vendor2\\Namespace\\'], $dependency->getNamespaces());
     }
 
@@ -198,7 +198,7 @@ class ComposerDependencyTest extends ComposerTestCase
             ],
         ]);
 
-        $dependency = new ComposerDependency($rootPath, self::TEST_DEPENDENCY);
+        $dependency = new ComposerJson($rootPath, self::TEST_DEPENDENCY);
         $this->assertEquals(['Monolog2\\', 'Vendor2\\Namespace\\', 'Monolog\\', 'Vendor\\Namespace\\'], $dependency->getNamespaces());
     }
 
@@ -213,11 +213,11 @@ class ComposerDependencyTest extends ComposerTestCase
             ],
         ]);
 
-        $dependency = new ComposerDependency($rootPath, self::TEST_DEPENDENCY);
+        $dependency = new ComposerJson($rootPath, self::TEST_DEPENDENCY);
         $this->assertEquals([
-            new ComposerDependency($rootPath, 'org/dep'),
-            new ComposerDependency($rootPath, 'org2/dep2'),
-            new ComposerDependency($rootPath, 'org2/dep3'),
+            new ComposerJson($rootPath, 'org/dep'),
+            new ComposerJson($rootPath, 'org2/dep2'),
+            new ComposerJson($rootPath, 'org2/dep3'),
         ], $dependency->getRequires());
     }
 
@@ -233,11 +233,11 @@ class ComposerDependencyTest extends ComposerTestCase
             ],
         ]);
 
-        $dependency = new ComposerDependency($rootPath, self::TEST_DEPENDENCY);
+        $dependency = new ComposerJson($rootPath, self::TEST_DEPENDENCY);
         $this->assertEquals([
-            new ComposerDependency($rootPath, 'org/dep'),
-            new ComposerDependency($rootPath, 'org2/dep2'),
-            new ComposerDependency($rootPath, 'org2/dep3'),
+            new ComposerJson($rootPath, 'org/dep'),
+            new ComposerJson($rootPath, 'org2/dep2'),
+            new ComposerJson($rootPath, 'org2/dep3'),
         ], $dependency->getRequires());
     }
 
@@ -254,11 +254,11 @@ class ComposerDependencyTest extends ComposerTestCase
             ],
         ]);
 
-        $dependency = new ComposerDependency($rootPath, self::TEST_DEPENDENCY);
+        $dependency = new ComposerJson($rootPath, self::TEST_DEPENDENCY);
         $actual = [
-            new ComposerDependency($rootPath, 'org/dep'),
-            new ComposerDependency($rootPath, 'org2/depext2'),
-            new ComposerDependency($rootPath, 'orgext2/dep3'),
+            new ComposerJson($rootPath, 'org/dep'),
+            new ComposerJson($rootPath, 'org2/depext2'),
+            new ComposerJson($rootPath, 'orgext2/dep3'),
         ];
         $this->assertEquals($actual, $dependency->getRequires());
     }
@@ -272,7 +272,7 @@ class ComposerDependencyTest extends ComposerTestCase
             ],
         ]);
 
-        $dependency = new ComposerDependency($rootPath, self::TEST_DEPENDENCY);
+        $dependency = new ComposerJson($rootPath, self::TEST_DEPENDENCY);
         $this->assertEquals(['somefile.php', 'someotherfile.php'], $dependency->getAutoloadFiles());
     }
 
@@ -280,7 +280,7 @@ class ComposerDependencyTest extends ComposerTestCase
     {
         $rootPath = $this->setUpTestProject(null, [self::TEST_DEPENDENCY], null);
 
-        $dependency = new ComposerDependency($rootPath, self::TEST_DEPENDENCY);
+        $dependency = new ComposerJson($rootPath, self::TEST_DEPENDENCY);
         $this->assertEquals([], $dependency->getAutoloadFiles());
     }
 
@@ -290,7 +290,7 @@ class ComposerDependencyTest extends ComposerTestCase
             'name' => 'project',
         ]);
 
-        $dependency = new ComposerDependency($rootPath, self::TEST_DEPENDENCY);
+        $dependency = new ComposerJson($rootPath, self::TEST_DEPENDENCY);
         $this->assertEquals([], $dependency->getAutoloadFiles());
     }
 
@@ -298,7 +298,7 @@ class ComposerDependencyTest extends ComposerTestCase
     {
         $rootPath = $this->setUpTestProject(null, [self::TEST_DEPENDENCY], null);
 
-        $dependency = new ComposerDependency($rootPath, self::TEST_DEPENDENCY);
+        $dependency = new ComposerJson($rootPath, self::TEST_DEPENDENCY);
         $this->assertEquals(null, $dependency->getComposerJsonContents());
     }
 
@@ -308,7 +308,7 @@ class ComposerDependencyTest extends ComposerTestCase
             'test' => 'value',
         ]);
 
-        $dependency = new ComposerDependency($rootPath, self::TEST_DEPENDENCY);
+        $dependency = new ComposerJson($rootPath, self::TEST_DEPENDENCY);
         $this->assertEquals(['test' => 'value'], $dependency->getComposerJsonContents());
     }
 
@@ -320,7 +320,7 @@ class ComposerDependencyTest extends ComposerTestCase
         mkdir(dirname($composerJsonPath), 0777, true);
         file_put_contents($composerJsonPath, '{"abc":"def"}');
 
-        $dependency = new ComposerDependency($rootPath, self::TEST_DEPENDENCY);
+        $dependency = new ComposerJson($rootPath, self::TEST_DEPENDENCY);
         $this->assertEquals(['abc' => 'def'], $dependency->getComposerJsonContents());
     }
 }

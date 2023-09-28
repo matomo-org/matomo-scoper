@@ -8,7 +8,6 @@
 
 namespace Matomo\Scoper\Prefixers;
 
-use Matomo\Scoper\Composer\ComposerProject;
 use Matomo\Scoper\GeneratedFiles\PluginScoperInc;
 use Matomo\Scoper\PluginDetails;
 use Matomo\Scoper\Prefixer;
@@ -30,8 +29,7 @@ class PluginPrefixer extends Prefixer
         if (empty($this->dependenciesToPrefix)) {
             $output->writeln("<comment>No \"prefixedDependencies\" key found in plugin.json file, will prefix all dependencies.</comment>");
 
-            $composerProject = new ComposerProject($paths->getRepoPath(), $filesystem);
-            $composerFile = $composerProject->getComposerJson(); // TODO: refactor other code to use ComposerJson
+            $composerFile = $this->composerProject->getComposerJson();
 
             $this->dependenciesToPrefix = $composerFile->getAllTopLevelDependencies();
             $this->dependenciesToIgnore = $composerFile->getAllReplacedDependencies();

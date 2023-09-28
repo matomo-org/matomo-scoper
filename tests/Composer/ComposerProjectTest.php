@@ -8,7 +8,7 @@
 
 namespace Matomo\Scoper\Tests\Composer;
 
-use Matomo\Scoper\Composer\ComposerDependency;
+use Matomo\Scoper\Composer\ComposerJson;
 use Matomo\Scoper\Composer\ComposerProject;
 use Matomo\Scoper\Tests\Framework\ComposerTestCase;
 use Symfony\Component\Filesystem\Filesystem;
@@ -620,12 +620,12 @@ class ComposerProjectTest extends ComposerTestCase
 
         $actual = $composerProject->getFlatDependencyTreeFor(['org/dep1', 'org4/dep7']);
         $expected = [
-            new ComposerDependency($rootPath, 'org/dep1'),
-            new ComposerDependency($rootPath, 'org4/dep7'),
-            new ComposerDependency($rootPath, 'org1/dep2'),
-            new ComposerDependency($rootPath, 'org1/dep3'),
-            new ComposerDependency($rootPath, 'org2/dep4'),
-            new ComposerDependency($rootPath, 'org2/dep5'),
+            new ComposerJson($rootPath, 'org/dep1'),
+            new ComposerJson($rootPath, 'org4/dep7'),
+            new ComposerJson($rootPath, 'org1/dep2'),
+            new ComposerJson($rootPath, 'org1/dep3'),
+            new ComposerJson($rootPath, 'org2/dep4'),
+            new ComposerJson($rootPath, 'org2/dep5'),
         ];
 
         $this->assertEquals($expected, $actual);
@@ -675,10 +675,10 @@ class ComposerProjectTest extends ComposerTestCase
 
         $actual = $composerProject->getFlatDependencyTreeFor(['org/dep1', 'org4/dep7'], ['org1/dep3']);
         $expected = [
-            new ComposerDependency($rootPath, 'org/dep1'),
-            new ComposerDependency($rootPath, 'org4/dep7'),
-            new ComposerDependency($rootPath, 'org1/dep2'),
-            new ComposerDependency($rootPath, 'org2/dep4'),
+            new ComposerJson($rootPath, 'org/dep1'),
+            new ComposerJson($rootPath, 'org4/dep7'),
+            new ComposerJson($rootPath, 'org1/dep2'),
+            new ComposerJson($rootPath, 'org2/dep4'),
         ];
 
         $this->assertEquals($expected, $actual);
