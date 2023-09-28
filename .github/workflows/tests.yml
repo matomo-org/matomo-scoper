@@ -120,12 +120,7 @@ jobs:
   ScoperUnit:
     runs-on: ubuntu-20.04
     strategy:
-      fail-fast: false
-        - uses: actions/checkout@v3
-          with:
-            lfs: true
-            persist-credentials: false
-            submodules: true
+      fail-fast: true
     steps:
       - uses: actions/checkout@v3
         with:
