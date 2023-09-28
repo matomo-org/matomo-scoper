@@ -109,10 +109,7 @@ class ComposerDependency
      */
     public function getRequires(): array
     {
-        $dependencies = array_keys($this->composerJsonContents['require'] ?? []);
-        $dependencies = array_filter($dependencies, function ($name) {
-            return $name !== 'php' && strpos($name, 'ext-') !== 0;
-        });
+        $dependencies = self::getRequireEntriesFromComposerJson($this->composerJsonContents);
         $dependencies = array_map(function ($dependencySlug) {
             return new ComposerDependency($this->rootPath, $dependencySlug);
         }, $dependencies);
@@ -133,5 +130,15 @@ class ComposerDependency
     public function getComposerJsonContents(): ?array
     {
         return $this->composerJsonContents;
+    }
+
+    // TODO: unit test
+    public static function getRequireEntriesFromComposerJson(array $contents): array
+    {
+        $dependencies = array_keys($contents['require'] ?? []);
+        $dependencies = array_filter($dependencies, function ($name) {
+            return $name !== 'php' && strpos($name, 'ext-') !== 0;
+        });
+        return $dependencies;
     }
 }

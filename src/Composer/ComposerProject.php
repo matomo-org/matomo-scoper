@@ -12,14 +12,11 @@ use Symfony\Component\Filesystem\Filesystem;
 
 class ComposerProject
 {
-    private string $path;
+    public function __construct(private readonly string $path, private readonly Filesystem $filesystem) {}
 
-    private Filesystem $filesystem;
-
-    public function __construct(string $path, Filesystem $filesystem)
+    public function getComposerJson(): ComposerJson
     {
-        $this->path = $path;
-        $this->filesystem = $filesystem;
+        return new ComposerJson($this->path . '/composer.json');
     }
 
     /**
