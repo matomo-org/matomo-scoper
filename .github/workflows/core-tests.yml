@@ -16,8 +16,10 @@
 #
 # - the following attribute was added matomo-org/github-action-tests step
 #   setup-script: .github/scripts/run-scoper.sh
-# - the following schedule was added
-#   TODO
+# - the following schedule was added (from a pluguin's tests workflow)
+#
+#   schedule:
+#     - cron: "10 3 * * 6"
 
 name: Matomo Core Tests
 
@@ -28,6 +30,8 @@ on:
     branches:
       - 'main'
   workflow_dispatch:
+  schedule:
+    - cron: "10 3 * * 6"
 
 permissions:
   actions: read
