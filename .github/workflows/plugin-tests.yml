@@ -9,6 +9,15 @@
 #   for the run tests step was changed to 'maximum_supported_matomo'
 # - the following attribute was added to matomo-org/github-action-tests steps
 #   setup-script: .github/scripts/run-scoper.sh
+# - the following step was added after the checkout action of each job:
+#
+#   - run: |
+#       git clone -q --depth 1 https://github.com/matomo-org/plugin-GoogleAnalyticsImporter ${{ github.workspace }}/GoogleAnalyticsImporter
+#       cd ${{ github.workspace }}/GoogleAnalyticsImporter
+#       git fetch -q --depth 1 origin 5.x-dev
+#       git checkout FETCH_HEAD
+#       git submodule update -q --init --recursive --depth 1
+#       cd ${{ github.workspace }}
 
 name: Plugin Plugin Tests
 
@@ -50,6 +59,13 @@ jobs:
         with:
           lfs: true
           persist-credentials: false
+      - run: |
+          git clone -q --depth 1 https://github.com/matomo-org/plugin-GoogleAnalyticsImporter ${{ github.workspace }}/GoogleAnalyticsImporter
+          cd ${{ github.workspace }}/GoogleAnalyticsImporter
+          git fetch -q --depth 1 origin 5.x-dev
+          git checkout FETCH_HEAD
+          git submodule update -q --init --recursive --depth 1
+          cd ${{ github.workspace }}
       - name: Run tests
         uses: matomo-org/github-action-tests@main
         with:
@@ -69,6 +85,13 @@ jobs:
         with:
           lfs: true
           persist-credentials: false
+      - run: |
+          git clone -q --depth 1 https://github.com/matomo-org/plugin-GoogleAnalyticsImporter ${{ github.workspace }}/GoogleAnalyticsImporter
+          cd ${{ github.workspace }}/GoogleAnalyticsImporter
+          git fetch -q --depth 1 origin 5.x-dev
+          git checkout FETCH_HEAD
+          git submodule update -q --init --recursive --depth 1
+          cd ${{ github.workspace }}
       - name: running tests
         uses: matomo-org/github-action-tests@main
         with:
