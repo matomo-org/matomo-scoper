@@ -10,7 +10,7 @@ php8.2 $(which composer) install
 MATOMO_SCOPER_PATH="$(pwd)/bin/matomo-scoper"
 
 if [ "$PLUGIN_NAME" != "" ]; then
-  if [ "$PLUGIN_NAME" = "GoogleAnalyticsImporter" ];
+  if [ "$PLUGIN_NAME" = "GoogleAnalyticsImporter" ]; then
     cp tests/resources/googleanalyticsimporter-scoper.inc.php matomo/plugins/GoogleAnalyticsImporter/scoper.inc.php
   fi
 
