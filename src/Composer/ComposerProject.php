@@ -109,7 +109,7 @@ class ComposerProject
                 unset($composerJsonContents['autoload']);
 
                 $dependency->setComposerJsonContents($composerJsonContents);
-                $dependency->writeTo(sprintf('%s/%s/%s/composer.json', $this->path, $folder, $subfolder, 'composer.json'));
+                $dependency->writeTo(sprintf('%s/%s/%s/%s/composer.json', $this->path, 'vendor', $folder, $subfolder, 'composer.json'));
 
                 foreach ($autoload['classmap'] ?? [] as $classmapFolder) {
                     mkdir($this->path . '/vendor/' . $dependency->getName() . '/' . $classmapFolder, 0777, true);
