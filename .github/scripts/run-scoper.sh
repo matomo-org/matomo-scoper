@@ -7,6 +7,16 @@ cd ..
 
 php8.2 $(which composer) install
 
-cd matomo
+MATOMO_SCOPER_PATH="$(pwd)/bin/matomo-scoper"
 
-php8.2 ../bin/matomo-scoper scope -y .
+if [ "$PLUGIN_NAME" != "" ]; then
+  if [ "$PLUGIN_NAME" = "GoogleAnalyticsImporter" ];
+    cp tests/resources/googleanalyticsimporter-scoper.inc.php matomo/plugins/GoogleAnalyticsImporter/scoper.inc.php
+  fi
+
+  cd "matomo/plugins/$PLUGIN_NAME"
+else
+  cd matomo
+fi
+
+php8.2 "$MATOMO_SCOPER_PATH" scope -y .
