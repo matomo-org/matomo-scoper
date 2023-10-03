@@ -68,20 +68,7 @@ jobs:
           lfs: true
           persist-credentials: false
       - shell: bash
-        run: |
-          # NOTE: for plugin tests the github-action-tests action expects the workspace to have the plugin contents
-          # so we have to move things around a bit.
-          mkdir matomo-scoper
-          cp -R !(matomo-scoper) matomo-scoper
-
-          git clone -q --depth 1 https://github.com/matomo-org/plugin-GoogleAnalyticsImporter ${{ github.workspace }}/GoogleAnalyticsImporter
-          cd ${{ github.workspace }}/GoogleAnalyticsImporter
-          git fetch -q --depth 1 origin 5.x-dev
-          git checkout FETCH_HEAD
-          git submodule update -q --init --recursive --depth 1
-          cd ${{ github.workspace }}
-
-          cp ./GoogleAnalyticsImporter/* .
+        run: ${{ github.workspace }}/.github/scripts/setup-plugin-tests.sh
       - name: Run tests
         uses: matomo-org/github-action-tests@main
         with:
@@ -102,20 +89,7 @@ jobs:
           lfs: true
           persist-credentials: false
       - shell: bash
-        run: |
-          # NOTE: for plugin tests the github-action-tests action expects the workspace to have the plugin contents
-          # so we have to move things around a bit.
-          mkdir matomo-scoper
-          cp -R !(matomo-scoper) matomo-scoper
-
-          git clone -q --depth 1 https://github.com/matomo-org/plugin-GoogleAnalyticsImporter ${{ github.workspace }}/GoogleAnalyticsImporter
-          cd ${{ github.workspace }}/GoogleAnalyticsImporter
-          git fetch -q --depth 1 origin 5.x-dev
-          git checkout FETCH_HEAD
-          git submodule update -q --init --recursive --depth 1
-          cd ${{ github.workspace }}
-
-          cp ./GoogleAnalyticsImporter/* .
+        run: ${{ github.workspace }}/.github/scripts/setup-plugin-tests.sh
       - name: running tests
         uses: matomo-org/github-action-tests@main
         with:
