@@ -69,6 +69,8 @@ jobs:
           persist-credentials: false
       - shell: bash
         run: ${{ github.workspace }}/.github/scripts/setup-plugin-tests.sh
+        env:
+          WORKSPACE: ${{ github.workspace }}
       - name: Run tests
         uses: matomo-org/github-action-tests@main
         with:
@@ -90,6 +92,8 @@ jobs:
           persist-credentials: false
       - shell: bash
         run: ${{ github.workspace }}/.github/scripts/setup-plugin-tests.sh
+        env:
+          WORKSPACE: ${{ github.workspace }}
       - name: running tests
         uses: matomo-org/github-action-tests@main
         with:
