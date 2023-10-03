@@ -11,7 +11,8 @@
 #   setup-script: .github/scripts/run-scoper.sh
 # - the following step was added after the checkout action of each job:
 #
-#   - run: |
+#   - shell: bash
+#     run: |
 #       # NOTE: for plugin tests the github-action-tests action expects the workspace to have the plugin contents
 #       # so we have to move things around a bit.
 #       mkdir matomo-scoper
@@ -66,7 +67,8 @@ jobs:
         with:
           lfs: true
           persist-credentials: false
-      - run: |
+      - shell: bash
+        run: |
           # NOTE: for plugin tests the github-action-tests action expects the workspace to have the plugin contents
           # so we have to move things around a bit.
           mkdir matomo-scoper
@@ -99,7 +101,8 @@ jobs:
         with:
           lfs: true
           persist-credentials: false
-      - run: |
+      - shell: bash
+        run: |
           # NOTE: for plugin tests the github-action-tests action expects the workspace to have the plugin contents
           # so we have to move things around a bit.
           mkdir matomo-scoper
