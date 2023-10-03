@@ -16,3 +16,10 @@ git submodule update -q --init --recursive --depth 1
 cd $WORKSPACE
 
 cp -R ./GoogleAnalyticsImporter/* .
+
+echo "ls"
+ls
+echo "ls matomo-scoper"
+ls matomo-scoper
+echo "ls GoogleAnalyticsImporter"
+ls GoogleAnalyticsImporter
