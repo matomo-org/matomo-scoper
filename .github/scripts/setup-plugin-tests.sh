@@ -6,7 +6,7 @@ set -e
 # so we have to move things around a bit.
 shopt -s extglob
 mkdir matomo-scoper
-mv -R !(matomo-scoper) matomo-scoper
+mv !(matomo-scoper) matomo-scoper
 
 git clone -q --depth 1 https://github.com/matomo-org/plugin-GoogleAnalyticsImporter $WORKSPACE/GoogleAnalyticsImporter
 cd $WORKSPACE/GoogleAnalyticsImporter
@@ -15,7 +15,7 @@ git checkout FETCH_HEAD
 git submodule update -q --init --recursive --depth 1
 cd $WORKSPACE
 
-mv -R ./GoogleAnalyticsImporter/* .
+mv ./GoogleAnalyticsImporter/* .
 
 echo "ls"
 ls
