@@ -5,17 +5,11 @@ set -e
 # setup matomo-scoper (after matomo tests action sets up PHP, etc.)
 cd ..
 
-echo "ls"
-ls
-
-echo "ls matomo/plugins/GoogleAnalyticsImporter"
-ls matomo/plugins/GoogleAnalyticsImporter
-
 if [ "$PLUGIN_NAME" != "" ]; then
   MATOMO_SCOPER_PATH="$(pwd)/matomo-scoper/bin/matomo-scoper"
 
   if [ "$PLUGIN_NAME" = "GoogleAnalyticsImporter" ]; then
-    cp tests/resources/googleanalyticsimporter-scoper.inc.php matomo/plugins/GoogleAnalyticsImporter/scoper.inc.php
+    cp ./matomo-scoper/tests/resources/googleanalyticsimporter-scoper.inc.php matomo/plugins/GoogleAnalyticsImporter/scoper.inc.php
   fi
 
   cd matomo-scoper
