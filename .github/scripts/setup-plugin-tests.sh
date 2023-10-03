@@ -15,4 +15,4 @@ git checkout FETCH_HEAD
 git submodule update -q --init --recursive --depth 1
 cd $WORKSPACE
 
-cp ./GoogleAnalyticsImporter/* .
+cp -R ./GoogleAnalyticsImporter/* .
