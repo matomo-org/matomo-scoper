@@ -86,9 +86,11 @@ EOF;
                 return $content;
             }
 
-            // Matomo\\Dependencies\\GoogleAnalyticsImporter\\
             if ($filePath === __DIR__ . '/tests/resources/capturedresponses.log') {
-                $content = str_replace('Google_', 'Matomo\\\\Dependencies\\\\GoogleAnalyticsImporter\\\\Google_', $content);
+                $prefix = 'Matomo\\\\Dependencies\\\\GoogleAnalyticsImporter\\\\';
+                $content = preg_replace_callback('/([sO]):(\\d+):\\\\"Google_/', function ($matches) use ($prefix) {
+                    return $matches[1] . ':' . ((int)$matches[2] + strlen($prefix) - 3) . ':"' . $prefix . 'Google_';
+                }, $content);
             }
 
             return $content;
