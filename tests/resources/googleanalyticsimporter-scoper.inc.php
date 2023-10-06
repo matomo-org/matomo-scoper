@@ -79,6 +79,20 @@ EOF;
 
             return $content;
         },
+
+        // patcher for captured responses used by tests
+        static function (string $filePath, string $prefix, string $content) use ($isRenamingReferences): string {
+            if (!$isRenamingReferences) {
+                return $content;
+            }
+
+            // Matomo\\Dependencies\\GoogleAnalyticsImporter\\
+            if ($filePath === __DIR__ . '/tests/resources/capturedresponses.log') {
+                $content = str_replace('Google_', 'Matomo\\\\Dependencies\\\\GoogleAnalyticsImporter\\\\Google_', $content);
+            }
+
+            return $content;
+        },
     ],
     'include-namespaces' => $namespacesToIncludeRegexes,
     'exclude-namespaces' => $namespacesToExclude,
