@@ -80,6 +80,25 @@ EOF;
             return $content;
         },
 
+        // patcher for unit test files that use serialized response strings
+        static function (string $filePath, string $prefix, string $content) use ($isRenamingReferences): string {
+            if (!$isRenamingReferences) {
+                return $content;
+            }
+
+            $unitTestFolder = __DIR__ . '/tests/Unit/Google/';
+            if (strpos($filePath, $unitTestFolder) === 0) {
+                $content = preg_replace_callback('/s:(\d+):"\x00Google\\\\\\\\([^\x00]+)/', function (array $matches): string {
+                    $strSize = (int)$matches[1];
+                    return 's:' . ($strSize + strlen('Matomo\\Dependencies\\GoogleAnalyticsImporter\\'))
+                        . ":\\\"\x00Matomo\\Dependencies\\GoogleAnalyticsImporter\\Google\\"
+                        . str_replace('\\\\', '\\', $matches[2]);
+                }, $content);
+            }
+
+            return $content;
+        },
+
         // patcher for captured responses used by tests
         static function (string $filePath, string $prefix, string $content) use ($isRenamingReferences): string {
             if (!$isRenamingReferences) {
@@ -89,8 +108,47 @@ EOF;
             if ($filePath === __DIR__ . '/tests/resources/capturedresponses.log') {
                 $prefix = 'Matomo\\\\Dependencies\\\\GoogleAnalyticsImporter\\\\';
                 $content = preg_replace_callback('/([sO]):(\\d+):\\\\"Google_/', function ($matches) use ($prefix) {
-                    return $matches[1] . ':' . ((int)$matches[2] + strlen($prefix) - 3) . ':"' . $prefix . 'Google_';
+                    return $matches[1] . ':' . ((int)$matches[2] + strlen($prefix) - 3) . ':\\"' . $prefix . 'Google_';
                 }, $content);
+            }
+
+            return $content;
+        },
+
+        // patcher for files that class_alias new namespaced classes with old un-namespaced classes
+        static function (string $filePath, string $prefix, string $content) use ($isRenamingReferences): string {
+            if ($isRenamingReferences) {
+                return $content;
+            }
+
+            if ($filePath === __DIR__ . '/vendor/google/apiclient/src/aliases.php'
+                || $filePath === __DIR__ . '/vendor/google/apiclient-services/autoload.php'
+            ) {
+                $content = preg_replace_callback('/([\'"])Google_/', function ($matches) {
+                    return $matches[1] . 'Matomo\\\\Dependencies\\\\GoogleAnalyticsImporter\\\\Google_';
+                }, $content);
+            }
+
+            if ($filePath === __DIR__ . '/vendor/google/apiclient/src/aliases.php') {
+                $content = preg_replace('/class Google_Task_Composer.*?}/', "if (!class_exists('Google_Task_Composer')) {\n$1\n}", $content);
+            }
+
+            if ($filePath === __DIR__ . '/vendor/google/apiclient-services/autoload.php') {
+                // there is a core autoloader that will replace 'Matomo' in Matomo\Dependencies\... to Piwik\ if the
+                // Matomo\... class cannot be found.
+                //
+                // normally this wouldn't be an issue, but in the importer we will be unserializing classes that
+                // haven't been autoloaded, and some of those classes are handled by a special autoloader in one
+                // of google's libraries. this autoloader is called after the renaming autoloader changes the name to
+                // Piwik\Dependencies\..., so we need to be able to recognize both Matomo\ and Piwik\ there, or the
+                // target php file won't be loaded properly.
+                $replace = <<<EOF
+\\spl_autoload_register(function (\$class) {
+    \$class = preg_replace('/^Piwik\\\\\\\\Dependencies\\\\\\\\/', 'Matomo\\\\Dependencies\\\\', \$class);
+
+EOF;
+
+                $content = str_replace('\\spl_autoload_register(function ($class) {', $replace, $content);
             }
 
             return $content;

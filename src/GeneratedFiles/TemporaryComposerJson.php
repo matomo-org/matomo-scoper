@@ -27,7 +27,7 @@ class TemporaryComposerJson extends GeneratedFile
     {
         return json_encode([
             'autoload' => [
-                'classmap' => [''],
+                'classmap' => array_merge($this->getMergedClassmapEntry(), ['']),
                 'files' => $this->getFilesToAutoload(),
             ],
         ]);
@@ -48,5 +48,23 @@ class TemporaryComposerJson extends GeneratedFile
             $files = array_merge($files, $dependencyFiles);
         }
         return $files;
+    }
+
+    private function getMergedClassmapEntry(): array
+    {
+        // TODO: code redundancy w/ above
+        $classmap = [];
+        foreach ($this->prefixedDependencies as $dependencyPath) {
+            $dependency = $this->composerProject->getDependency($dependencyPath);
+            if (!$dependency) {
+                continue;
+            }
+
+            $dependencyFiles = $dependency->getAutoloadClassmap();
+            $dependencyFiles = array_map(function ($p) use ($dependencyPath) { return $dependencyPath . '/' . $p; }, $dependencyFiles);
+
+            $classmap = array_merge($classmap, $dependencyFiles);
+        }
+        return $classmap;
     }
 }

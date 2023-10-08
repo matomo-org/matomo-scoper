@@ -93,4 +93,9 @@ class ComposerJson
     {
         return array_keys($this->composerJsonContents['replace'] ?? []);
     }
+
+    public function getAutoloadClassmap()
+    {
+        return $this->composerJsonContents['autoload']['classmap'] ?? [];
+    }
 }
