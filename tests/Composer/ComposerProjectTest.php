@@ -178,12 +178,17 @@ class ComposerProjectTest extends ComposerTestCase
 
     public function test_createDummyComposerJsonFilesForPrefixedDeps_createsDummyComposerJsonFiles_forDependenciesInThePrefixedFolder()
     {
-        $rootPath = $this->setUpTestProject(['name' => 'root'], ['mustangostang/spyc', 'prefixed/lox/xhprof', 'prefixed/szymach/c-pchart'], [
-            'name' => 'dependency',
+        $dependencyComposerJsonContents = [
             'autoload' => 'junk',
-        ]);
+        ];
 
-        $this->setComposerJsonContents('szymach/c-pchart', [
+        $rootPath = $this->setUpTestProject(['name' => 'root'], ['mustangostang/spyc', 'lox/xhprof', 'szymach/c-pchart'], $dependencyComposerJsonContents);
+
+        $this->putTestProjectFile('vendor/mustangostang/spyc/composer.json', json_encode($dependencyComposerJsonContents));
+        $this->putTestProjectFile('vendor/prefixed/lox/xhprof/composer.json', json_encode($dependencyComposerJsonContents));
+        $this->putTestProjectFile('vendor/prefixed/szymach/c-pchart/composer.json', json_encode($dependencyComposerJsonContents));
+
+        $unprefixedPchartComposerJsonContents = [
             'name' => 'dependency',
             'autoload' => [
                 'classmap' => [
@@ -192,14 +197,18 @@ class ComposerProjectTest extends ComposerTestCase
                     "Something.php",
                 ],
             ],
-        ]);
+        ];
+        $this->setComposerJsonContents('szymach/c-pchart', $unprefixedPchartComposerJsonContents);
 
         mkdir($rootPath . '/vendor/prefixed/another/nocomposerjson', 0777, true);
 
         $allFiles = $this->getTestProjectFiles();
         $this->assertEquals([
             '/composer.json',
+            '/composer.lock',
             '/vendor',
+            '/vendor/lox',
+            '/vendor/lox/xhprof',
             '/vendor/mustangostang',
             '/vendor/mustangostang/spyc',
             '/vendor/mustangostang/spyc/composer.json',
@@ -212,6 +221,8 @@ class ComposerProjectTest extends ComposerTestCase
             '/vendor/prefixed/szymach',
             '/vendor/prefixed/szymach/c-pchart',
             '/vendor/prefixed/szymach/c-pchart/composer.json',
+            '/vendor/szymach',
+            '/vendor/szymach/c-pchart',
         ], $allFiles);
 
         $composerProject = new ComposerProject($rootPath, new Filesystem());
@@ -220,6 +231,7 @@ class ComposerProjectTest extends ComposerTestCase
         $allFiles = $this->getTestProjectFiles();
         $this->assertEquals([
             '/composer.json',
+            '/composer.lock',
             '/vendor',
             '/vendor/lox',
             '/vendor/lox/xhprof',
@@ -244,37 +256,31 @@ class ComposerProjectTest extends ComposerTestCase
             '/vendor/szymach/c-pchart/src',
         ], $allFiles);
 
+        // test composer json file for unprefixed dependencies was not modified
         $this->assertEquals(
-            ['name' => 'dependency', 'autoload' => 'junk'],
+            ['autoload' => 'junk'],
             $this->getTestProjectDependencyComposerJson('mustangostang/spyc')
         );
 
+        // check temporary composer json files for prefixed dependencies were created
         $this->assertEquals(
-            ['name' => 'dependency'],
+            ['name' => 'lox/xhprof'],
             $this->getTestProjectDependencyComposerJson('lox/xhprof')
         );
 
         $this->assertEquals(
-            ['name' => 'dependency'],
+            ['name' => 'szymach/c-pchart'],
             $this->getTestProjectDependencyComposerJson('szymach/c-pchart')
         );
 
+        // check composer.json files in prefixed dependency are unchanged
         $this->assertEquals(
-            ['name' => 'dependency', 'autoload' => 'junk'],
+            ['autoload' => 'junk'],
             $this->getTestProjectDependencyComposerJson('prefixed/lox/xhprof')
         );
 
         $this->assertEquals(
-            [
-                'name' => 'dependency',
-                'autoload' => [
-                    'classmap' => [
-                        "src/",
-                        "lib/",
-                        "Something.php",
-                    ],
-                ],
-            ],
+            ['autoload' => 'junk'],
             $this->getTestProjectDependencyComposerJson('prefixed/szymach/c-pchart')
         );
     }
@@ -578,116 +584,6 @@ class ComposerProjectTest extends ComposerTestCase
             EOF,
             $actualContents
         );
-    }
-
-    public function test_getFlatDependencyTreeFor_returnsFlatDependencyTree_forGivenDependencies()
-    {
-        $rootPath = $this->setUpTestProject([], [
-            'org/dep1', // depends on org1/dep2
-            'org1/dep2', // depends on org1/dep3, org2/dep4
-            'org1/dep3', // depends on org/dep1 (cycle), org2/dep5
-            'org2/dep4',
-            'org2/dep5', // has no composer.json
-            'org3/dep6', // depends on org4/dep7
-            'org4/dep7', // has no composer.json
-        ], null);
-
-        $this->putTestProjectFile('vendor/org/dep1/composer.json', json_encode([
-            'require' => [
-                'org1/dep2' => '*',
-                'php' => '*',
-            ],
-        ]));
-        $this->putTestProjectFile('vendor/org1/dep2/composer.json', json_encode([
-            'require' => [
-                'org1/dep3' => '*',
-                'org2/dep4' => '*',
-            ],
-        ]));
-        $this->putTestProjectFile('vendor/org1/dep3/composer.json', json_encode([
-            'require' => [
-                'org/dep1' => '*',
-                'org2/dep5' => '*',
-                'ext-mbstring' => '*',
-            ],
-        ]));
-        $this->putTestProjectFile('vendor/org2/dep4/composer.json', json_encode([
-            'require' => [
-                // empty
-            ],
-        ]));
-        $this->putTestProjectFile('vendor/org3/dep6/composer.json', json_encode([
-            'require' => [
-                'org4/dep7' => '*',
-            ],
-        ]));
-
-        $composerProject = new ComposerProject($rootPath, new Filesystem());
-
-        $actual = $composerProject->getFlatDependencyTreeFor(['org/dep1', 'org4/dep7']);
-        $expected = [
-            new ComposerJson($rootPath, 'org/dep1'),
-            new ComposerJson($rootPath, 'org4/dep7'),
-            new ComposerJson($rootPath, 'org1/dep2'),
-            new ComposerJson($rootPath, 'org1/dep3'),
-            new ComposerJson($rootPath, 'org2/dep4'),
-            new ComposerJson($rootPath, 'org2/dep5'),
-        ];
-
-        $this->assertEquals($expected, $actual);
-    }
-
-    public function test_getFlatDependencyTreeFor_ignoresDependencies_ifDependenciesToIgnoreRequested()
-    {
-        $rootPath = $this->setUpTestProject([], [
-            'org/dep1', // depends on org1/dep2
-            'org1/dep2', // depends on org1/dep3, org2/dep4
-            'org1/dep3', // depends on org/dep1 (cycle), org2/dep5
-            'org2/dep4',
-            'org2/dep5', // has no composer.json
-            'org3/dep6', // depends on org4/dep7
-            'org4/dep7', // has no composer.json
-        ], null);
-
-        $this->putTestProjectFile('vendor/org/dep1/composer.json', json_encode([
-            'require' => [
-                'org1/dep2' => '*',
-            ],
-        ]));
-        $this->putTestProjectFile('vendor/org1/dep2/composer.json', json_encode([
-            'require' => [
-                'org1/dep3' => '*',
-                'org2/dep4' => '*',
-            ],
-        ]));
-        $this->putTestProjectFile('vendor/org1/dep3/composer.json', json_encode([
-            'require' => [
-                'org/dep1' => '*',
-                'org2/dep5' => '*',
-            ],
-        ]));
-        $this->putTestProjectFile('vendor/org2/dep4/composer.json', json_encode([
-            'require' => [
-                // empty
-            ],
-        ]));
-        $this->putTestProjectFile('vendor/org3/dep6/composer.json', json_encode([
-            'require' => [
-                'org4/dep7' => '*',
-            ],
-        ]));
-
-        $composerProject = new ComposerProject($rootPath, new Filesystem());
-
-        $actual = $composerProject->getFlatDependencyTreeFor(['org/dep1', 'org4/dep7'], ['org1/dep3']);
-        $expected = [
-            new ComposerJson($rootPath, 'org/dep1'),
-            new ComposerJson($rootPath, 'org4/dep7'),
-            new ComposerJson($rootPath, 'org1/dep2'),
-            new ComposerJson($rootPath, 'org2/dep4'),
-        ];
-
-        $this->assertEquals($expected, $actual);
     }
 
     private function getTestProjectFiles()
