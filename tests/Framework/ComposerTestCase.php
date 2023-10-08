@@ -31,14 +31,50 @@ abstract class ComposerTestCase extends TestCase
             file_put_contents($rootPath . '/composer.json', json_encode($composerJsonContents));
         }
 
-        foreach ($dependencies as $dependency) {
-            mkdir($rootPath . '/vendor/' . $dependency, 0777, true);
-            if ($dependencyComposerJsonContents != null) {
-                file_put_contents($rootPath . '/vendor/' . $dependency . '/composer.json', json_encode($dependencyComposerJsonContents));
+        /*
+         * TODO
+         * setComposerJsonContents
+         */
+
+        if ($dependencyComposerJsonContents !== null) {
+            mkdir($rootPath, 0777, true);
+            $composerLockContents = [
+                'packages' => [],
+            ];
+
+            foreach ($dependencies as $dependency) {
+                $composerLockContents['packages'][] = array_merge($dependencyComposerJsonContents, [
+                    'name' => $dependency,
+                ]);
             }
+
+            file_put_contents($rootPath . '/composer.lock', json_encode($composerLockContents));
         }
 
         return $rootPath;
+    }
+
+    protected function setComposerJsonContents(string $dependency, array $contents): void
+    {
+        $rootPath = $this->getTestProjectRootPath();
+
+        $composerLockPath = $rootPath . '/composer.lock';
+
+        $composerLockContents = [
+            'packages' => [],
+        ];
+
+        if (is_file($composerLockPath)) {
+            $composerLockContents = json_decode(file_get_contents($composerLockPath), true);
+        }
+
+        $composerLockContents['packages'] = array_filter($composerLockContents['packages'], function ($dependencyInfo) use ($dependency) {
+            return $dependencyInfo['name'] !== $dependency;
+        });
+
+        $composerLockContents['packages'][] = array_merge($contents, ['name' => $dependency]);
+
+        $this->putTestProjectFile('composer.lock', json_encode($composerLockContents));
     }
 
     protected function removeTestProject(): void
