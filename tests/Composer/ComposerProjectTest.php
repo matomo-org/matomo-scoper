@@ -183,7 +183,7 @@ class ComposerProjectTest extends ComposerTestCase
             'autoload' => 'junk',
         ]);
 
-        file_put_contents($rootPath . '/vendor/prefixed/szymach/c-pchart/composer.json', json_encode([
+        $this->setComposerJsonContents('szymach/c-pchart', [
             'name' => 'dependency',
             'autoload' => [
                 'classmap' => [
@@ -192,7 +192,7 @@ class ComposerProjectTest extends ComposerTestCase
                     "Something.php",
                 ],
             ],
-        ]));
+        ]);
 
         mkdir($rootPath . '/vendor/prefixed/another/nocomposerjson', 0777, true);
 
@@ -291,9 +291,14 @@ class ComposerProjectTest extends ComposerTestCase
 
         $rootPath = $this->setUpTestProject(['name' => 'root'], $dependencyFolders, ['name' => 'dependency']);
 
+        foreach ($dependencyFolders as $dependency) {
+            $this->putTestProjectFile('vendor/' . $dependency . '/composer.json', json_encode(['name' => $dependency]));
+        }
+
         $allFiles = $this->getTestProjectFiles();
         $this->assertEquals([
             '/composer.json',
+            '/composer.lock',
             '/vendor',
             '/vendor/lox',
             '/vendor/lox/xhprof',
@@ -319,6 +324,7 @@ class ComposerProjectTest extends ComposerTestCase
         $allFiles = $this->getTestProjectFiles();
         $this->assertEquals([
             '/composer.json',
+            '/composer.lock',
             '/vendor',
             '/vendor/lox',
             '/vendor/mustangostang',

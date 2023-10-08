@@ -26,23 +26,25 @@ abstract class ComposerTestCase extends TestCase
 
         $rootPath = $this->getTestProjectRootPath();
 
-        if ($composerJsonContents !== null) {
+        if (!is_dir($rootPath)) {
             mkdir($rootPath, 0777, true);
+        }
+
+        if ($composerJsonContents !== null) {
             file_put_contents($rootPath . '/composer.json', json_encode($composerJsonContents));
         }
 
-        /*
-         * TODO
-         * setComposerJsonContents
-         */
-
         if ($dependencyComposerJsonContents !== null) {
-            mkdir($rootPath, 0777, true);
             $composerLockContents = [
                 'packages' => [],
             ];
 
             foreach ($dependencies as $dependency) {
+                $dependencyPath = $rootPath . '/vendor/' . $dependency;
+                if (!is_dir($dependencyPath)) {
+                    mkdir($dependencyPath, 0777, true);
+                }
+
                 $composerLockContents['packages'][] = array_merge($dependencyComposerJsonContents, [
                     'name' => $dependency,
                 ]);
