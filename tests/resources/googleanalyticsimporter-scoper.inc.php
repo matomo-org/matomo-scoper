@@ -156,4 +156,5 @@ EOF;
     ],
     'include-namespaces' => $namespacesToIncludeRegexes,
     'exclude-namespaces' => $namespacesToExclude,
+    'exclude-constants' => ['PIWIK_TEST_MODE'],
 ];
