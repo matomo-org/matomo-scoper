@@ -161,4 +161,7 @@ return [
     ],
     'include-namespaces' => $namespacesToIncludeRegexes,
     'exclude-namespaces' => $namespacesToExclude,
+    'exclude-constants' => [
+        '/^self::/', // work around php-scoper bug
+    ],
 ];
