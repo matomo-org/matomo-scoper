@@ -10,7 +10,7 @@ mv !(matomo-scoper) matomo-scoper
 
 git clone -q --depth 1 https://github.com/matomo-org/plugin-GoogleAnalyticsImporter $WORKSPACE/GoogleAnalyticsImporter
 cd $WORKSPACE/GoogleAnalyticsImporter
-git fetch -q --depth 1 origin debug-build
+git fetch -q --depth 1 origin 5.x-dev
 git checkout FETCH_HEAD
 git submodule update -q --init --recursive --depth 1
 cd $WORKSPACE
