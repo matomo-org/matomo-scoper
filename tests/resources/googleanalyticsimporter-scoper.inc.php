@@ -112,6 +112,10 @@ EOF;
                 }, $content);
             }
 
+            if ($filePath === __DIR__ . '/tests/resources/capturedresponses-ga4.log') {
+                $content = str_replace('"Google\\\\', '"Matomo\\\\Dependencies\\\\GoogleAnalyticsImporter\\\\Google\\\\', $content);
+            }
+
             return $content;
         },
 
