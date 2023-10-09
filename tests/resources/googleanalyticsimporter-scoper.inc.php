@@ -113,7 +113,28 @@ EOF;
             }
 
             if ($filePath === __DIR__ . '/tests/resources/capturedresponses-ga4.log') {
+                // replace key values all at once
                 $content = str_replace('"Google\\\\', '"Matomo\\\\Dependencies\\\\GoogleAnalyticsImporter\\\\Google\\\\', $content);
+
+                // prefix values in array contents line by line
+                $lines = explode("\n", $content);
+                foreach ($lines as &$line) {
+                    $data = json_decode($line, true);
+                    if (empty($data)) {
+                        continue;
+                    }
+
+                    $responseData = base64_decode($data[1]);
+
+                    $prefix = 'Matomo\\Dependencies\\GoogleAnalyticsImporter\\';
+                    $responseData = preg_replace_callback('/([sO]):(\\d+):"(\x00)?(Google|GuzzleHttp)\\\\/', function ($matches) use ($prefix) {
+                        return $matches[1] . ':' . ((int)$matches[2] + strlen($prefix)) . ":\"" . $matches[3] . $prefix . $matches[4] . '\\';
+                    }, $responseData);
+                    $responseData = base64_encode($responseData);
+
+                    $line = json_encode([$data[0], $responseData]);
+                }
+                $content = implode("\n", $lines);
             }
 
             return $content;
