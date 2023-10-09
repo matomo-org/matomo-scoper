@@ -27,7 +27,7 @@
 #
 #       cp ./GoogleAnalyticsImporter/* .
 
-name: Plugin Plugin Tests
+name: Matomo Plugin Tests
 
 on:
   pull_request:
