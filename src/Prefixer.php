@@ -83,7 +83,7 @@ abstract class Prefixer
         $this->output->writeln("<info>  Scoping vendor...</info>");
 
         $command = new PhpScoper($this->paths, $this->output, $dependenciesToPrefix, $namespacesToInclude);
-        $command->setPluginName($this->getPluginNameIfAny());
+        $command->setPlugin($this->getPluginNameIfAny());
         $command->passthru();
 
         $this->removePrefixedDependencies($dependenciesToPrefix);
@@ -94,7 +94,7 @@ abstract class Prefixer
         // rename dependencies in rest of project
         $this->output->writeln("<info>  Scoping references in rest of project...</info>");
         $command = new PhpScoper($this->paths, $this->output, $dependenciesToPrefix, $namespacesToInclude);
-        $command->setPluginName($this->getPluginNameIfAny());
+        $command->setPlugin($this->getPluginNameIfAny());
         $command->renameReferences(true);
         $command->passthru();
     }
