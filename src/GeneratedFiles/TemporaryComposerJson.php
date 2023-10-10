@@ -12,9 +12,6 @@ use Matomo\Scoper\Composer\ComposerJson;
 use Matomo\Scoper\Composer\ComposerProject;
 use Matomo\Scoper\GeneratedFile;
 
-/**
- * TODO: document
- */
 class TemporaryComposerJson extends GeneratedFile
 {
 
@@ -36,35 +33,36 @@ class TemporaryComposerJson extends GeneratedFile
     private function getFilesToAutoload(): array
     {
         $files = [];
-        foreach ($this->prefixedDependencies as $dependencyPath) {
-            $dependency = $this->composerProject->getDependency($dependencyPath);
-            if (!$dependency) {
-                continue;
-            }
-
+        $this->foreachPrefixedDependency(function (ComposerJson $dependency) use (&$files) {
             $dependencyFiles = $dependency->getAutoloadFiles();
-            $dependencyFiles = array_map(function ($p) use ($dependencyPath) { return $dependencyPath . '/' . $p; }, $dependencyFiles);
+            $dependencyFiles = array_map(function ($p) use ($dependency) { return $dependency->getName() . '/' . $p; }, $dependencyFiles);
 
             $files = array_merge($files, $dependencyFiles);
-        }
+        });
         return $files;
     }
 
     private function getMergedClassmapEntry(): array
     {
-        // TODO: code redundancy w/ above
         $classmap = [];
-        foreach ($this->prefixedDependencies as $dependencyPath) {
-            $dependency = $this->composerProject->getDependency($dependencyPath);
+        $this->foreachPrefixedDependency(function (ComposerJson $dependency) use (&$classmap) {
+            $dependencyFiles = $dependency->getAutoloadClassmap();
+            $dependencyFiles = array_map(function ($p) use ($dependency) { return $dependency->getName() . '/' . $p; }, $dependencyFiles);
+
+            $classmap = array_merge($classmap, $dependencyFiles);
+        });
+        return $classmap;
+    }
+
+    private function foreachPrefixedDependency(callable $callback): void
+    {
+        foreach ($this->prefixedDependencies as $name) {
+            $dependency = $this->composerProject->getDependency($name);
             if (!$dependency) {
                 continue;
             }
 
-            $dependencyFiles = $dependency->getAutoloadClassmap();
-            $dependencyFiles = array_map(function ($p) use ($dependencyPath) { return $dependencyPath . '/' . $p; }, $dependencyFiles);
-
-            $classmap = array_merge($classmap, $dependencyFiles);
+            $callback($dependency);
         }
-        return $classmap;
     }
 }

@@ -8,7 +8,6 @@
 
 namespace Matomo\Scoper;
 
-use Matomo\Scoper\Composer\ComposerJson;
 use Matomo\Scoper\Composer\ComposerProject;
 use Matomo\Scoper\ShellCommands\PhpScoper;
 use Matomo\Scoper\Utilities\Paths;
@@ -84,6 +83,7 @@ abstract class Prefixer
         $this->output->writeln("<info>  Scoping vendor...</info>");
 
         $command = new PhpScoper($this->paths, $this->output, $dependenciesToPrefix, $namespacesToInclude);
+        $command->setPluginName($this->getPluginNameIfAny());
         $command->passthru();
 
         $this->removePrefixedDependencies($dependenciesToPrefix);
@@ -94,7 +94,17 @@ abstract class Prefixer
         // rename dependencies in rest of project
         $this->output->writeln("<info>  Scoping references in rest of project...</info>");
         $command = new PhpScoper($this->paths, $this->output, $dependenciesToPrefix, $namespacesToInclude);
+        $command->setPluginName($this->getPluginNameIfAny());
         $command->renameReferences(true);
         $command->passthru();
+    }
+
+    private function getPluginNameIfAny(): ?string
+    {
+        try {
+            return (new PluginDetails($this->paths->getRepoPath()))->getPluginName();
+        } catch (\Exception $ex) {
+            return null;
+        }
     }
 }

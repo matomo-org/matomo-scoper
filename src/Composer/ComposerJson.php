@@ -54,9 +54,9 @@ class ComposerJson
     /**
      * @return ComposerJson[]
      */
-    public function getRequires(ComposerLock $lockFile): array // TODO: swap method name w/ getAllTopLevelDependencies()
+    public function getAllTopLevelDependencies(ComposerLock $lockFile): array
     {
-        $dependencies = $this->getAllTopLevelDependencies();
+        $dependencies = $this->getRequires();
         $dependencies = array_map(function ($dependencyName) use ($lockFile) {
             return $lockFile->getDependency($dependencyName);
         }, $dependencies);
@@ -80,7 +80,7 @@ class ComposerJson
         return $this->composerJsonContents;
     }
 
-    public function getAllTopLevelDependencies(): array
+    public function getRequires(): array
     {
         $dependencies = array_keys($this->composerJsonContents['require'] ?? []);
         $dependencies = array_filter($dependencies, function ($name) {

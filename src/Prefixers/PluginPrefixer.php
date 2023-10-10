@@ -31,7 +31,7 @@ class PluginPrefixer extends Prefixer
 
             $composerFile = $this->composerProject->getComposerJson();
 
-            $this->dependenciesToPrefix = $composerFile->getAllTopLevelDependencies();
+            $this->dependenciesToPrefix = $composerFile->getRequires();
             $this->dependenciesToIgnore = $composerFile->getAllReplacedDependencies();
         }
     }

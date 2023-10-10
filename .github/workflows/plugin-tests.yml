@@ -1,4 +1,3 @@
-# TODO: no longer accurate
 # Action for running GoogleAnalyticsImporter tests
 #
 # This file was copied from the matomo-tests.yml workflow in the GoogleAnalyticsImporter plugin with the
@@ -6,27 +5,20 @@
 # - the name of the suite was changed to "Matomo Plugin Tests"
 # - the push to branches trigger was set to just 'main'
 # - the concurrency group was changed to plugin-${{ github.ref }}
-# - for the PluginTests job the, the target attribute was removed from the matrix, and the matomo-test-branch
+# - for the PluginTests job, the target attribute was removed from the matrix and the matomo-test-branch
 #   for the run tests step was changed to 'maximum_supported_matomo'
 # - the following attribute was added to matomo-org/github-action-tests steps
 #   setup-script: .github/scripts/run-scoper.sh
 # - the following step was added after the checkout action of each job:
 #
 #   - shell: bash
-#     run: |
-#       # NOTE: for plugin tests the github-action-tests action expects the workspace to have the plugin contents
-#       # so we have to move things around a bit.
-#       mkdir matomo-scoper
-#       cp -R !(matomo-scoper) matomo-scoper
+#     run: ${{ github.workspace }}/.github/scripts/setup-plugin-tests.sh
+#     env:
+#       WORKSPACE: ${{ github.workspace }}
+# - the following schedule was added (from a pluguin's tests workflow)
 #
-#       git clone -q --depth 1 https://github.com/matomo-org/plugin-GoogleAnalyticsImporter ${{ github.workspace }}/GoogleAnalyticsImporter
-#       cd ${{ github.workspace }}/GoogleAnalyticsImporter
-#       git fetch -q --depth 1 origin 5.x-dev
-#       git checkout FETCH_HEAD
-#       git submodule update -q --init --recursive --depth 1
-#       cd ${{ github.workspace }}
-#
-#       cp ./GoogleAnalyticsImporter/* .
+#   schedule:
+#     - cron: "10 3 * * 6"
 
 name: Matomo Plugin Tests
 

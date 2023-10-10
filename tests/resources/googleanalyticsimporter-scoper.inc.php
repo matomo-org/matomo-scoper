@@ -12,6 +12,7 @@ use Isolated\Symfony\Component\Finder\Finder;
 $dependenciesToPrefix = json_decode(getenv('MATOMO_DEPENDENCIES_TO_PREFIX'), true);
 $namespacesToPrefix = json_decode(getenv('MATOMO_NAMESPACES_TO_PREFIX'), true);
 $isRenamingReferences = getenv('MATOMO_RENAME_REFERENCES') == 1;
+$pluginName = getenv('MATOMO_PLUGIN');
 
 $namespacesToExclude = [];
 $forceNoGlobalAlias = false;
@@ -52,7 +53,7 @@ return [
     'expose-global-classes' => false,
     'expose-global-functions' => false,
     'force-no-global-alias' => $forceNoGlobalAlias,
-    'prefix' => 'Matomo\Dependencies\GoogleAnalyticsImporter',
+    'prefix' => 'Matomo\\Dependencies\\' . $pluginName,
     'finders' => $finders,
     'patchers' => [
         // patcher for google's protobuf related classes which need to prefix class names at runtime

@@ -84,7 +84,7 @@ class ComposerJsonTest extends ComposerTestCase
         $this->assertEquals(['Monolog2\\', 'Vendor2\\Namespace\\', 'Monolog\\', 'Vendor\\Namespace\\'], $dependency->getNamespaces());
     }
 
-    public function test_getRequires_returnsComposerDependencies_forProject()
+    public function test_getAllTopLevelDependencies_returnsComposerDependencies_forProject()
     {
         $rootPath = $this->setUpTestProject(null, [self::TEST_DEPENDENCY, 'org/dep', 'org2/dep2', 'org2/dep3'], [
             'require' => [
@@ -100,10 +100,10 @@ class ComposerJsonTest extends ComposerTestCase
             $composerLock->getDependency('org/dep'),
             $composerLock->getDependency('org2/dep2'),
             $composerLock->getDependency('org2/dep3'),
-        ], $dependency->getRequires($composerLock));
+        ], $dependency->getAllTopLevelDependencies($composerLock));
     }
 
-    public function test_getRequires_ignoresPhpVersionRequirement()
+    public function test_getAllTopLevelDependencies_ignoresPhpVersionRequirement()
     {
         $rootPath = $this->setUpTestProject(null, [self::TEST_DEPENDENCY, 'org/dep', 'org2/dep2', 'org2/dep3'], [
             'name' => 'project',
@@ -121,10 +121,10 @@ class ComposerJsonTest extends ComposerTestCase
             $composerLock->getDependency('org/dep'),
             $composerLock->getDependency('org2/dep2'),
             $composerLock->getDependency('org2/dep3'),
-        ], $dependency->getRequires($composerLock));
+        ], $dependency->getAllTopLevelDependencies($composerLock));
     }
 
-    public function test_getRequires_ignoresPhpExtensionRequirements()
+    public function test_getAllTopLevelDependencies_ignoresPhpExtensionRequirements()
     {
         $rootPath = $this->setUpTestProject(null, [self::TEST_DEPENDENCY, 'org/dep', 'org2/depext2', 'orgext2/dep3'], [
             'name' => 'project',
@@ -144,7 +144,7 @@ class ComposerJsonTest extends ComposerTestCase
             $composerLock->getDependency('org2/depext2'),
             $composerLock->getDependency('orgext2/dep3'),
         ];
-        $this->assertEquals($actual, $dependency->getRequires($composerLock));
+        $this->assertEquals($actual, $dependency->getAllTopLevelDependencies($composerLock));
     }
 
     public function test_getAutoloadFiles_returnsFilesDefinedInComposerJson_ifComposerJsonPresent()

@@ -30,7 +30,7 @@ class ComposerLock
             $dependency = array_shift($dependenciesToProcess);
             $flatDependencyTree[$dependency->getName()] = $dependency;
 
-            $childDependencies = $dependency->getRequires($this);
+            $childDependencies = $dependency->getAllTopLevelDependencies($this);
             foreach ($childDependencies as $childDep) {
                 $id = $childDep->getName();
 
