@@ -8,8 +8,10 @@
 
 namespace Matomo\Scoper\Tests\GeneratedFiles;
 
+use Matomo\Scoper\Composer\ComposerProject;
 use Matomo\Scoper\GeneratedFiles\TemporaryComposerJson;
 use Matomo\Scoper\Tests\Framework\ComposerTestCase;
+use Symfony\Component\Filesystem\Filesystem;
 
 class TemporaryComposerJsonTest extends ComposerTestCase
 {
@@ -26,24 +28,23 @@ class TemporaryComposerJsonTest extends ComposerTestCase
                 'prefixed/org2/dep6', // no autoload files
                 'org2/anotherdep',
             ],
-            ['name' => 'dependency'],
+            [],
         );
 
-        $this->putTestProjectFile('vendor/prefixed/org1/dep3/composer.json', json_encode([
+        $this->setComposerJsonContents('org1/dep3', [
             'autoload' => [
                 'psr-0' => ['SomeNamespace\\' => 'src/'],
                 'files' => ['dep3.php'],
             ],
-        ]));
-        unlink($rootPath . '/vendor/prefixed/org2/dep4/composer.json');
-        $this->putTestProjectFile('vendor/prefixed/org2/dep5/composer.json', json_encode([
+        ]);
+        $this->setComposerJsonContents('org2/dep5', [
             'autoload' => [
                 'files' => ['dep5.php', 'src/depanother5.php'],
             ],
-        ]));
-        $this->putTestProjectFile('vendor/prefixed/org2/dep6/composer.json', json_encode([]));
+        ]);
+        $this->setComposerJsonContents('org2/dep6', []);
 
-        $file = new TemporaryComposerJson($rootPath, ['org1/dep3', 'org2/dep4', 'org2/dep5', 'org2/dep6']);
+        $file = new TemporaryComposerJson(['org1/dep3', 'org2/dep4', 'org2/dep5', 'org2/dep6'], new ComposerProject($rootPath, new Filesystem()));
         $content = $file->getContent();
         $content = json_decode($content, true);
 

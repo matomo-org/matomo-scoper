@@ -28,6 +28,8 @@ class PhpScoper extends ShellCommand
 
     private bool $renameReferences = false;
 
+    private ?string $pluginName = null;
+
     public function __construct(Paths $paths, OutputInterface $output, array $dependenciesToPrefix, array $namespacesToInclude)
     {
         parent::__construct($output);
@@ -41,9 +43,14 @@ class PhpScoper extends ShellCommand
         }
     }
 
-    public function renameReferences(bool $value)
+    public function renameReferences(bool $value): void
     {
         $this->renameReferences = $value;
+    }
+
+    public function setPlugin(?string $pluginName): void
+    {
+        $this->pluginName = $pluginName;
     }
 
     public function getCommand(): string
@@ -57,6 +64,10 @@ class PhpScoper extends ShellCommand
 
         $env = 'MATOMO_DEPENDENCIES_TO_PREFIX="' . addslashes(json_encode($this->dependenciesToPrefix)) . '" '
             . 'MATOMO_NAMESPACES_TO_PREFIX="' . addslashes(json_encode($this->namespacesToInclude)) . '"';
+
+        if (!empty($this->pluginName)) {
+            $env .= ' MATOMO_PLUGIN="' . addslashes($this->pluginName) . '"';
+        }
 
         $extraOptions = '';
         if ($this->renameReferences) {

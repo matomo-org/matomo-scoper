@@ -1,0 +1,102 @@
+# Action for running GoogleAnalyticsImporter tests
+#
+# This file was copied from the matomo-tests.yml workflow in the GoogleAnalyticsImporter plugin with the
+# following changes:
+# - the name of the suite was changed to "Matomo Plugin Tests"
+# - the push to branches trigger was set to just 'main'
+# - the concurrency group was changed to plugin-${{ github.ref }}
+# - for the PluginTests job, the target attribute was removed from the matrix and the matomo-test-branch
+#   for the run tests step was changed to 'maximum_supported_matomo'
+# - the following attribute was added to matomo-org/github-action-tests steps
+#   setup-script: .github/scripts/run-scoper.sh
+# - the following step was added after the checkout action of each job:
+#
+#   - shell: bash
+#     run: ${{ github.workspace }}/.github/scripts/setup-plugin-tests.sh
+#     env:
+#       WORKSPACE: ${{ github.workspace }}
+# - the following schedule was added (from a pluguin's tests workflow)
+#
+#   schedule:
+#     - cron: "10 3 * * 6"
+
+name: Matomo Plugin Tests
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  push:
+    branches:
+      - 'main'
+  workflow_dispatch:
+  schedule:
+    - cron: "10 3 * * 6"
+
+permissions:
+  actions: read
+  checks: none
+  contents: read
+  deployments: none
+  issues: read
+  packages: none
+  pull-requests: read
+  repository-projects: none
+  security-events: none
+  statuses: none
+
+concurrency:
+  group: plugin-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  PluginTests:
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        php: [ '7.2', '8.2' ]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          lfs: true
+          persist-credentials: false
+      - shell: bash
+        run: ${{ github.workspace }}/.github/scripts/setup-plugin-tests.sh
+        env:
+          WORKSPACE: ${{ github.workspace }}
+      - name: Run tests
+        uses: matomo-org/github-action-tests@main
+        with:
+          plugin-name: 'GoogleAnalyticsImporter'
+          php-version: ${{ matrix.php }}
+          test-type: 'PluginTests'
+          matomo-test-branch: 'maximum_supported_matomo'
+          artifacts-pass: ${{ secrets.ARTIFACTS_PASS }}
+          upload-artifacts: ${{ matrix.php == '7.2' && matrix.target == 'maximum_supported_matomo' }}
+          dependent-plugins: 'matomo-org/plugin-MarketingCampaignsReporting innocraft/plugin-Funnels'
+          github-token: ${{ secrets.TESTS_ACCESS_TOKEN || secrets.GITHUB_TOKEN }}
+          setup-script: .github/scripts/run-scoper.sh
+  UI:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          lfs: true
+          persist-credentials: false
+      - shell: bash
+        run: ${{ github.workspace }}/.github/scripts/setup-plugin-tests.sh
+        env:
+          WORKSPACE: ${{ github.workspace }}
+      - name: running tests
+        uses: matomo-org/github-action-tests@main
+        with:
+          plugin-name: 'GoogleAnalyticsImporter'
+          matomo-test-branch: 'maximum_supported_matomo'
+          test-type: 'UI'
+          php-version: '7.2'
+          node-version: '16'
+          artifacts-pass: ${{ secrets.ARTIFACTS_PASS }}
+          upload-artifacts: true
+          dependent-plugins: 'matomo-org/plugin-MarketingCampaignsReporting innocraft/plugin-Funnels'
+          github-token: ${{ secrets.TESTS_ACCESS_TOKEN || secrets.GITHUB_TOKEN }}
+          setup-script: .github/scripts/run-scoper.sh

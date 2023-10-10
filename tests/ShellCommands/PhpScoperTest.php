@@ -59,4 +59,27 @@ CMD;
 
         $this->assertEquals($expected, $actual);
     }
+
+    public function test_getCommand_generatesCorrectCommand_whenRepoIsForPlugin()
+    {
+        $dependenciesToPrefix = ['org1/dep1', 'org2/dep2'];
+        $namespacesToPrefix = ['Twig\\', 'Monolog\\', 'SomeOther\\Ns\\'];
+
+        $paths = new Paths('/path/to/matomo', '/path/to/composer');
+        $command = new PhpScoper($paths, new NullOutput(), $dependenciesToPrefix, $namespacesToPrefix);
+        $command->setPlugin('MyPlugin');
+
+        $dependenciesEnvVar = addslashes(json_encode($dependenciesToPrefix));
+        $namespacesEnvVar = addslashes(json_encode($namespacesToPrefix));
+        $libDir = MATOMO_SCOPER_ROOT_PATH;
+
+        $phpBinary = PHP_BINARY;
+
+        $actual = $command->getCommand();
+        $expected = <<<CMD
+cd /path/to/matomo/vendor && MATOMO_DEPENDENCIES_TO_PREFIX="$dependenciesEnvVar" MATOMO_NAMESPACES_TO_PREFIX="$namespacesEnvVar" MATOMO_PLUGIN="MyPlugin" $phpBinary $libDir/php-scoper.phar add --force --output-dir=./prefixed/ --config=../scoper.inc.php
+CMD;
+
+        $this->assertEquals($expected, $actual);
+    }
 }

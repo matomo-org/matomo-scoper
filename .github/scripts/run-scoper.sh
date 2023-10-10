@@ -5,8 +5,24 @@ set -e
 # setup matomo-scoper (after matomo tests action sets up PHP, etc.)
 cd ..
 
-php8.2 $(which composer) install
+if [ "$PLUGIN_NAME" != "" ]; then
+  MATOMO_SCOPER_PATH="$(pwd)/matomo-scoper/bin/matomo-scoper"
 
-cd matomo
+  if [ "$PLUGIN_NAME" = "GoogleAnalyticsImporter" ]; then
+    cp ./matomo-scoper/tests/resources/googleanalyticsimporter-scoper.inc.php matomo/plugins/GoogleAnalyticsImporter/scoper.inc.php
+  fi
 
-php8.2 ../bin/matomo-scoper scope -y .
+  cd matomo-scoper
+
+  php8.2 $(which composer) install
+
+  cd "../matomo/plugins/$PLUGIN_NAME"
+else
+  MATOMO_SCOPER_PATH="$(pwd)/bin/matomo-scoper"
+
+  php8.2 $(which composer) install
+
+  cd matomo
+fi
+
+php8.2 "$MATOMO_SCOPER_PATH" scope -y .

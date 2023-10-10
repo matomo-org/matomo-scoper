@@ -37,6 +37,7 @@ if ($isRenamingReferences) {
             ->notPath('%^tests/PHPUnit/proxy/console$%')
             ->notPath('%^console$%')
             ->notPath('%^tests/javascript/index.php$%')
+            ->notName('scoper.inc.php')
 
             // prefixing will change the line number of an exception and break the test, so we'll just skip it
             ->notPath('%^plugins/Monolog/tests/Unit/Processor/ExceptionToTextProcessorTest\\.php$%')
@@ -160,4 +161,7 @@ return [
     ],
     'include-namespaces' => $namespacesToIncludeRegexes,
     'exclude-namespaces' => $namespacesToExclude,
+    'exclude-constants' => [
+        '/^self::/', // work around php-scoper bug
+    ],
 ];

@@ -25,6 +25,15 @@ class PluginPrefixer extends Prefixer
 
         $this->pluginDetails = new PluginDetails($this->paths->getRepoPath());
         $this->dependenciesToPrefix = $this->pluginDetails->getDependenciesToPrefix();
+
+        if (empty($this->dependenciesToPrefix)) {
+            $output->writeln("<comment>No \"prefixedDependencies\" key found in plugin.json file, will prefix all dependencies.</comment>");
+
+            $composerFile = $this->composerProject->getComposerJson();
+
+            $this->dependenciesToPrefix = $composerFile->getRequires();
+            $this->dependenciesToIgnore = $composerFile->getAllReplacedDependencies();
+        }
     }
 
     public function run(): array

@@ -15,12 +15,13 @@
 #       git submodule update -q --init --recursive --depth 1
 #       cd ${{ github.workspace }}
 #
-# - the following attribute was added matomo-org/github-action-tests step
+# - the following attribute was added to matomo-org/github-action-tests steps
 #   setup-script: .github/scripts/run-scoper.sh
 # - the following schedule was added (from a pluguin's tests workflow)
 #
 #   schedule:
 #     - cron: "10 3 * * 6"
+# - the concurrency group was changed to core-${{ github.ref }}
 
 name: Matomo Core Tests
 
