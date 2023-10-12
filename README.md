@@ -2,7 +2,7 @@
 
 ## Description
 
-matomo-scoper is a small CLI tool that wraps [php-scoper](github.com/humbug/php-scoper) and is used to add namespace to
+matomo-scoper is a small CLI tool that wraps [php-scoper](https://github.com/humbug/php-scoper) and is used to add namespace to
 prefixes to all classes within one or more dependencies of the core Matomo platform code or a Matomo plugin's code.
 
 This allows using the entire platform or individual plugins alongside other PHP software with the same composer
