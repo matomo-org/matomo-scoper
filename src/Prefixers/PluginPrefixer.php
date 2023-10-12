@@ -36,11 +36,11 @@ class PluginPrefixer extends Prefixer
         }
     }
 
-    public function run(): array
+    public function run(bool $renameReferences): array
     {
         $scoperIncFile = new PluginScoperInc($this->paths->getRepoPath(), $this->pluginDetails->getPluginName());
         $scoperIncFile->writeIfNotExists();
 
-        return parent::run();
+        return parent::run($renameReferences);
     }
 }
