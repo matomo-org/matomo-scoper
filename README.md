@@ -1,4 +1,4 @@
-# PHP Dependency Scoping Tool for Matomo and Matomo Plugins
+# PHP Dependency Scoper For Matomo/Matomo Plugins
 
 ## Description
 
