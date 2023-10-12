@@ -39,11 +39,11 @@ class CorePrefixer extends Prefixer
         $this->dependenciesToIgnore = self::DEPENDENCIES_TO_IGNORE;
     }
 
-    public function run(): array
+    public function run(bool $renameReferences): array
     {
         $scoperIncFile = new CoreScoperInc($this->paths->getRepoPath());
         $scoperIncFile->writeIfNotExists();
 
-        return parent::run();
+        return parent::run($renameReferences);
     }
 }

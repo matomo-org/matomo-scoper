@@ -38,6 +38,8 @@ class ScopeCommand extends Command
         $this->addOption('composer-path', null, InputOption::VALUE_REQUIRED,
             'Path to composer. Required to generate a new autoloader.', getenv('COMPOSER_BINARY') ?: 'composer');
         $this->addOption('yes', 'y', InputOption::VALUE_NONE, 'Bypass confirmation.');
+        $this->addOption('rename-references', null, InputOption::VALUE_NONE,
+            'Rename references in the main repo after prefixing dependencies. (Note: this will destroy formatting of PHP code so is not enabled by default.)');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -45,6 +47,7 @@ class ScopeCommand extends Command
         $repoPath = $input->getArgument('repo_path');
         $composerPath = $this->getComposerPath($input);
         $bypassConfirmation = $input->getOption('yes');
+        $renameReferences = $input->getOption('rename-references');
 
         $paths = new Paths($repoPath, $composerPath);
         $filesystem = new Filesystem();
@@ -74,7 +77,7 @@ class ScopeCommand extends Command
         }
 
         $output->writeln("<info>Prefixing dependencies...</info>");
-        $prefixedDependencies = $prefixer->run();
+        $prefixedDependencies = $prefixer->run($renameReferences);
         if (empty($prefixedDependencies)) {
             $output->writeln("<info>Nothing prefixed.</info>");
             return Command::SUCCESS;

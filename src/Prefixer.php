@@ -33,7 +33,7 @@ abstract class Prefixer
         $this->composerProject = new ComposerProject($this->paths->getRepoPath(), $this->filesystem);
     }
 
-    public function run(): array
+    public function run(bool $renameReferences): array
     {
         if (empty($this->dependenciesToPrefix)) {
             return [];
@@ -42,7 +42,9 @@ abstract class Prefixer
         list($dependenciesToPrefix, $namespacesToInclude) = $this->collectChildDependencies();
 
         $this->scopeDependencies($dependenciesToPrefix, $namespacesToInclude);
-        $this->renameReferencesToScopedDependencies($dependenciesToPrefix, $namespacesToInclude);
+        if ($renameReferences) {
+            $this->renameReferencesToScopedDependencies($dependenciesToPrefix, $namespacesToInclude);
+        }
 
         return $dependenciesToPrefix;
     }
