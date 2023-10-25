@@ -28,7 +28,7 @@ Also note that for Matomo plugins, it is expected that you will add and commit t
 
   ```bash
   cd /path/to/matomo-scoper
-  ./bin/matomo-scoper /path/to/matomo/plugins/MyPlugin
+  ./bin/matomo-scoper scope /path/to/matomo/plugins/MyPlugin
   ```
 
 (Note: if your composer phar is not named `composer` and on your `$PATH`, you can specify it via the `--composer-path` option.)
@@ -64,5 +64,5 @@ the Matomo for Wordpress wordpress plugin does. If you do, though, this is how y
 
   ```bash
   cd /path/to/matomo-scoper
-  ./bin/matomo-scoper /path/to/matomo --rename-references
+  ./bin/matomo-scoper scope /path/to/matomo --rename-references
   ```
