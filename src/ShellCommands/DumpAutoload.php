@@ -18,11 +18,14 @@ class DumpAutoload extends ShellCommand
 
     private string $workingDirectory;
 
-    public function __construct(Paths $paths, OutputInterface $output, string $workingDirectory)
+    private bool $ignorePlatformCheck;
+
+    public function __construct(Paths $paths, OutputInterface $output, string $workingDirectory, bool $ignorePlatformCheck)
     {
         parent::__construct($output);
         $this->paths = $paths;
         $this->workingDirectory = $workingDirectory;
+        $this->ignorePlatformCheck = $ignorePlatformCheck;
     }
 
     public function getCommand(): string
@@ -30,6 +33,11 @@ class DumpAutoload extends ShellCommand
         $composerPath = $this->paths->getComposerPath();
         $composerCommand = escapeshellarg($composerPath) . " --working-dir=" . escapeshellarg($this->workingDirectory)
             . " dump-autoload -o --no-interaction";
+
+        if ($this->ignorePlatformCheck) {
+            $composerCommand .= ' --ignore-platform-reqs';
+        }
+
         return $composerCommand;
     }
 }

@@ -18,10 +18,21 @@ class DumpAutoloadTest extends TestCase
     public function test_getCommand_constructsCorrectCommand()
     {
         $paths = new Paths('/path/to/matomo', '/path/to/composer');
-        $command = new DumpAutoload($paths, new NullOutput(), '/path/to/matomo/plugins/plugin');
+        $command = new DumpAutoload($paths, new NullOutput(), '/path/to/matomo/plugins/plugin', false);
 
         $actualCommand = $command->getCommand();
         $expectedCommand = "'/path/to/composer' --working-dir='/path/to/matomo/plugins/plugin' dump-autoload -o --no-interaction";
+
+        $this->assertEquals($expectedCommand, $actualCommand);
+    }
+
+    public function test_getCommand_constructsCorrectCommandWithIgnorePlatformCheck()
+    {
+        $paths = new Paths('/path/to/matomo', '/path/to/composer');
+        $command = new DumpAutoload($paths, new NullOutput(), '/path/to/matomo/plugins/plugin', true);
+
+        $actualCommand = $command->getCommand();
+        $expectedCommand = "'/path/to/composer' --working-dir='/path/to/matomo/plugins/plugin' dump-autoload -o --no-interaction --ignore-platform-reqs";
 
         $this->assertEquals($expectedCommand, $actualCommand);
     }
