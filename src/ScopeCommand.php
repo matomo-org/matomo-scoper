@@ -41,7 +41,7 @@ class ScopeCommand extends Command
         $this->addOption('rename-references', null, InputOption::VALUE_NONE,
             'Rename references in the main repo after prefixing dependencies. (Note: this will destroy formatting of PHP code so is not enabled by default.)');
         $this->addOption('ignore-platform-check', null, InputOption::VALUE_NONE,
-            'Remove the platform check when the new autoloader is generated.)');
+            'Remove the platform check when the new autoloader is generated.');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
