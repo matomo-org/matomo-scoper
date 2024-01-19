@@ -15,25 +15,34 @@ use Symfony\Component\Console\Output\NullOutput;
 
 class DumpAutoloadTest extends TestCase
 {
-    public function test_getCommand_constructsCorrectCommand()
+    /**
+     * @dataProvider get_getCommand_testValues
+     *
+     * @param bool $ignorePlatformCheck
+     * @param string $expectedCommand
+     * @return void
+     */
+    public function test_getCommand_constructsCorrectCommand(bool $ignorePlatformCheck, string $expectedCommand)
     {
         $paths = new Paths('/path/to/matomo', '/path/to/composer');
-        $command = new DumpAutoload($paths, new NullOutput(), '/path/to/matomo/plugins/plugin', false);
+        $command = new DumpAutoload($paths, new NullOutput(), '/path/to/matomo/plugins/plugin', $ignorePlatformCheck);
 
         $actualCommand = $command->getCommand();
-        $expectedCommand = "'/path/to/composer' --working-dir='/path/to/matomo/plugins/plugin' dump-autoload -o --no-interaction";
 
-        $this->assertEquals($expectedCommand, $actualCommand);
+        $this->assertEquals($expectedCommand, $actualCommand, "When ignorePlatform is {$ignorePlatformCheck}, the expected command is: {$expectedCommand}");
     }
 
-    public function test_getCommand_constructsCorrectCommandWithIgnorePlatformCheck()
+    public static function get_getCommand_testValues()
     {
-        $paths = new Paths('/path/to/matomo', '/path/to/composer');
-        $command = new DumpAutoload($paths, new NullOutput(), '/path/to/matomo/plugins/plugin', true);
-
-        $actualCommand = $command->getCommand();
-        $expectedCommand = "'/path/to/composer' --working-dir='/path/to/matomo/plugins/plugin' dump-autoload -o --no-interaction --ignore-platform-reqs";
-
-        $this->assertEquals($expectedCommand, $actualCommand);
+        return [
+            [
+                false,
+                "'/path/to/composer' --working-dir='/path/to/matomo/plugins/plugin' dump-autoload -o --no-interaction",
+            ],
+            [
+                true,
+                "'/path/to/composer' --working-dir='/path/to/matomo/plugins/plugin' dump-autoload -o --no-interaction --ignore-platform-reqs",
+            ],
+        ];
     }
 }
