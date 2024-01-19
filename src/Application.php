@@ -11,7 +11,7 @@ namespace Matomo\Scoper;
 class Application extends \Symfony\Component\Console\Application
 {
     const APP_NAME = 'matomo-scoper';
-    const VERSION = '0.1.0';
+    const VERSION = '0.1.1';
 
     public function __construct()
     {

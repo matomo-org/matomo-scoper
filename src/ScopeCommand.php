@@ -40,6 +40,8 @@ class ScopeCommand extends Command
         $this->addOption('yes', 'y', InputOption::VALUE_NONE, 'Bypass confirmation.');
         $this->addOption('rename-references', null, InputOption::VALUE_NONE,
             'Rename references in the main repo after prefixing dependencies. (Note: this will destroy formatting of PHP code so is not enabled by default.)');
+        $this->addOption('ignore-platform-check', null, InputOption::VALUE_NONE,
+            'Remove the platform check when the new autoloader is generated.');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -48,6 +50,7 @@ class ScopeCommand extends Command
         $composerPath = $this->getComposerPath($input);
         $bypassConfirmation = $input->getOption('yes');
         $renameReferences = $input->getOption('rename-references');
+        $ignorePlatformCheck = $input->getOption('ignore-platform-check');
 
         $paths = new Paths($repoPath, $composerPath);
         $filesystem = new Filesystem();
@@ -86,7 +89,7 @@ class ScopeCommand extends Command
         $output->writeln("");
         $output->writeln("<info>Regenerating autoloader...</info>");
 
-        $autoloaderGenerator = new AutoloaderGenerator($paths, $filesystem, $output, $prefixedDependencies);
+        $autoloaderGenerator = new AutoloaderGenerator($paths, $filesystem, $output, $prefixedDependencies, $ignorePlatformCheck);
         $autoloaderGenerator->generate();
 
         $output->writeln("<info>Done.</info>");

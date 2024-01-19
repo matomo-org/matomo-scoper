@@ -25,6 +25,7 @@ class AutoloaderGenerator
         private readonly Filesystem $filesystem,
         private readonly OutputInterface $output,
         private readonly array $prefixedDependencies,
+        private readonly bool $ignorePlatformCheck,
     )
     {
         $this->composerProject = new ComposerProject($paths->getRepoPath(), $this->filesystem);
@@ -46,7 +47,7 @@ class AutoloaderGenerator
         $tempComposerJson = new TemporaryComposerJson($this->prefixedDependencies, $this->composerProject);
         $tempComposerJson->write();
 
-        $dumpAutoload = new DumpAutoload($this->paths, $this->output, $repoPath . '/vendor/prefixed');
+        $dumpAutoload = new DumpAutoload($this->paths, $this->output, $repoPath . '/vendor/prefixed', $this->ignorePlatformCheck);
         $dumpAutoload->passthru();;
 
         // TODO: why do we do this again?
@@ -70,8 +71,8 @@ class AutoloaderGenerator
         $this->composerProject->createDummyComposerJsonFilesForPrefixedDeps();
 
         try {
-            $regenerateUnprefixedAutload = new DumpAutoload($this->paths, $this->output, $repoPath);
-            $regenerateUnprefixedAutload->passthru();;
+            $regenerateUnprefixedAutload = new DumpAutoload($this->paths, $this->output, $repoPath, $this->ignorePlatformCheck);
+            $regenerateUnprefixedAutload->passthru();
         } finally {
             $this->composerProject->removeDummyComposerJsonFilesForPrefixedDeps();
         }
