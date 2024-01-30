@@ -29,6 +29,10 @@ class CorePrefixer extends Prefixer
     const DEPENDENCIES_TO_IGNORE = [
         'symfony/polyfill-php80',
         'symfony/polyfill-php73',
+        'symfony/polyfill-ctype',
+        'symfony/polyfill-intl-grapheme',
+        'symfony/polyfill-intl-normalizer',
+        'symfony/polyfill-mbstring',
     ];
 
     public function __construct(Paths $paths, Filesystem $filesystem, OutputInterface $output)
