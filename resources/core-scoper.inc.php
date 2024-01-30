@@ -163,5 +163,6 @@ return [
     'exclude-namespaces' => $namespacesToExclude,
     'exclude-constants' => [
         '/^self::/', // work around php-scoper bug
+        '/^Normalizer::/',
     ],
 ];
