@@ -164,5 +164,13 @@ return [
     'exclude-constants' => [
         '/^self::/', // work around php-scoper bug
         '/^Normalizer::/',
+        '/^ZEND_MONITOR_/',
+        '/^Redis::/',
+        'PHPUNIT_COMPOSER_INSTALL',
+    ],
+    'exclude-functions' => [
+        '/^zend_monitor_/',
+        '/^litespeed_/',
+        'setproctitle',
     ],
 ];
