@@ -140,13 +140,15 @@ return [
             return $content;
         },
 
-        // patchers for php-di
+        // patcher to remove prefixing from template files
         static function (string $filePath, string $prefix, string $content) use ($isRenamingReferences): string {
             if ($isRenamingReferences) {
                 return $content;
             }
 
-            if (preg_match('%src/Compiler/Template\\.php$%', $filePath)) {
+            if (preg_match('%php-di/php-di/src/Compiler/Template\\.php$%', $filePath)
+                || preg_match('%symfony/error-handler/Resources/.*\\.php$%', $filePath)
+            ) {
                 $content = preg_replace('%namespace Matomo\\\\Dependencies;\s+%', '', $content);
             }
 
