@@ -148,6 +148,8 @@ return [
 
             if (preg_match('%php-di/php-di/src/Compiler/Template\\.php$%', $filePath)
                 || preg_match('%symfony/error-handler/Resources/.*\\.php$%', $filePath)
+                || preg_match('%symfony/http-kernel/Resources/.*\\.php$%', $filePath)
+                || preg_match('%symfony/var-dumper/Resources/bin/var-dump-server$%', $filePath)
             ) {
                 $content = preg_replace('%namespace Matomo\\\\Dependencies;\s+%', '', $content);
             }
