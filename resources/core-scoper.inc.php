@@ -57,9 +57,10 @@ if ($isRenamingReferences) {
     $forceNoGlobalAlias = true;
 } else {
     $finders = array_map(function ($dependency) {
-        return Finder::create()
+        $finder = Finder::create()
             ->files()
             ->in($dependency);
+        return $finder;
     }, $dependenciesToPrefix);
 }
 
@@ -134,6 +135,19 @@ return [
                 || preg_match('%symfony/polyfill-intl-normalizer/Resources/unidata/compatibilityDecomposition\\.php$%', $filePath)
             ) {
                 $content = str_replace(html_entity_decode('&nbsp;'), "\\xC2\\xA0", $content);
+            }
+
+            return $content;
+        },
+
+        // patchers for php-di
+        static function (string $filePath, string $prefix, string $content) use ($isRenamingReferences): string {
+            if ($isRenamingReferences) {
+                return $content;
+            }
+
+            if (preg_match('%src/Compiler/Template\\.php$%', $filePath)) {
+                $content = preg_replace('%namespace Matomo\\\\Dependencies;\s+%', '', $content);
             }
 
             return $content;
