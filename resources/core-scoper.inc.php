@@ -57,9 +57,10 @@ if ($isRenamingReferences) {
     $forceNoGlobalAlias = true;
 } else {
     $finders = array_map(function ($dependency) {
-        return Finder::create()
+        $finder = Finder::create()
             ->files()
             ->in($dependency);
+        return $finder;
     }, $dependenciesToPrefix);
 }
 
@@ -134,6 +135,23 @@ return [
                 || preg_match('%symfony/polyfill-intl-normalizer/Resources/unidata/compatibilityDecomposition\\.php$%', $filePath)
             ) {
                 $content = str_replace(html_entity_decode('&nbsp;'), "\\xC2\\xA0", $content);
+            }
+
+            return $content;
+        },
+
+        // patcher to remove prefixing from template files
+        static function (string $filePath, string $prefix, string $content) use ($isRenamingReferences): string {
+            if ($isRenamingReferences) {
+                return $content;
+            }
+
+            if (preg_match('%php-di/php-di/src/Compiler/Template\\.php$%', $filePath)
+                || preg_match('%symfony/error-handler/Resources/.*\\.php$%', $filePath)
+                || preg_match('%symfony/http-kernel/Resources/.*\\.php$%', $filePath)
+                || preg_match('%symfony/var-dumper/Resources/bin/var-dump-server$%', $filePath)
+            ) {
+                $content = preg_replace('%namespace Matomo\\\\Dependencies;\s+%', '', $content);
             }
 
             return $content;
