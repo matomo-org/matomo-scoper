@@ -24,6 +24,7 @@ class CorePrefixer extends Prefixer
         'symfony/event-dispatcher',
         'symfony/console', // new version now depends on service-contracts which symfony/monolog-bridge also depends on
         'php-di/php-di',
+        'geoip2/geoip2',
     ];
 
     const DEPENDENCIES_TO_IGNORE = [
