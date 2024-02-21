@@ -34,6 +34,7 @@ class CorePrefixer extends Prefixer
         'symfony/polyfill-intl-grapheme',
         'symfony/polyfill-intl-normalizer',
         'symfony/polyfill-mbstring',
+        'composer/ca-bundle',
     ];
 
     public function __construct(Paths $paths, Filesystem $filesystem, OutputInterface $output)
