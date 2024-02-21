@@ -24,6 +24,7 @@ class CorePrefixer extends Prefixer
         'symfony/event-dispatcher',
         'symfony/console', // new version now depends on service-contracts which symfony/monolog-bridge also depends on
         'php-di/php-di',
+        'geoip2/geoip2',
     ];
 
     const DEPENDENCIES_TO_IGNORE = [
@@ -33,6 +34,7 @@ class CorePrefixer extends Prefixer
         'symfony/polyfill-intl-grapheme',
         'symfony/polyfill-intl-normalizer',
         'symfony/polyfill-mbstring',
+        'composer/ca-bundle',
     ];
 
     public function __construct(Paths $paths, Filesystem $filesystem, OutputInterface $output)
