@@ -26,6 +26,10 @@ class CorePrefixer extends Prefixer
         'php-di/php-di',
         'geoip2/geoip2',
         'pear/pear_exception',
+        'pear/archive_tar',
+        'pear/console_getopt',
+        'pear/pear-core-minimal',
+        'pear/pear_exception',
     ];
 
     const DEPENDENCIES_TO_IGNORE = [

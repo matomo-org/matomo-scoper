@@ -77,6 +77,17 @@ return [
     'prefix' => 'Matomo\\Dependencies',
     'finders' => $finders,
     'patchers' => [
+        // patchers for PEAR (pear libraries do not use psr autoloading and put everything in a global namespace,
+        // so we can't automatically rename references to PEAR libraries)
+        static function (string $filePath, string $prefix, string $content) use ($isRenamingReferences): string {
+            if (!$isRenamingReferences) {
+                return $content;
+            }
+
+            $content = preg_replace('/([^\\\\A-Za-z0-9_])\\\\PEAR_/', '$1\\Matomo\\Dependencies\\PEAR_', $content);
+            return $content;
+        },
+
         // patchers for twig
         static function (string $filePath, string $prefix, string $content) use ($isRenamingReferences): string {
             // correct use statements in generated templates
