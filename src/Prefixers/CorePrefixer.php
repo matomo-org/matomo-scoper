@@ -25,6 +25,11 @@ class CorePrefixer extends Prefixer
         'symfony/console', // new version now depends on service-contracts which symfony/monolog-bridge also depends on
         'php-di/php-di',
         'geoip2/geoip2',
+        'pear/pear_exception',
+        'pear/archive_tar',
+        'pear/console_getopt',
+        'pear/pear-core-minimal',
+        'pear/pear_exception',
     ];
 
     const DEPENDENCIES_TO_IGNORE = [
