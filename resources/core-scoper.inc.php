@@ -27,7 +27,8 @@ if ($isRenamingReferences) {
             ->files()
             ->in(__DIR__)
             ->exclude('build')
-            ->exclude('vendor')
+            ->exclude('vendor/prefixed')
+            ->exclude('vendor/composer')
             ->exclude('node_modules')
             ->exclude('tmp')
             ->exclude('@types')
@@ -84,7 +85,14 @@ return [
                 return $content;
             }
 
-            $content = preg_replace('/([^\\\\A-Za-z0-9_])\\\\PEAR_/', '$1\\Matomo\\Dependencies\\PEAR_', $content);
+            if (!preg_match('/\\.php$/', $filePath)) {
+                return $content;
+            }
+
+            $content = preg_replace('/([^\\\\A-Za-z0-9_])\\\\?PEAR(?!\\/)/', '$1\\Matomo\\Dependencies\\PEAR', $content);
+            $content = preg_replace('/([^\\\\A-Za-z0-9_])\\\\?Archive_Tar(?!\\/)/', '$1\\Matomo\\Dependencies\\Archive_Tar', $content);
+            $content = preg_replace('/([^\\\\A-Za-z0-9_])\\\\?Console_Getopt(?!\\/)/', '$1\\Matomo\\Dependencies\\Console_Getopt', $content);
+            $content = preg_replace('/([^\\\\A-Za-z0-9_])\\\\?OS_Guess(?!\\/)/', '$1\\Matomo\\Dependencies\\OS_Guess', $content);
             return $content;
         },
 
@@ -144,6 +152,8 @@ return [
                 || preg_match('%symfony/string/AbstractUnicodeString\\.php$%', $filePath)
                 || preg_match('%plugins/ImageGraph/StaticGraph\\.php$%', $filePath)
                 || preg_match('%symfony/polyfill-intl-normalizer/Resources/unidata/compatibilityDecomposition\\.php$%', $filePath)
+                || preg_match('%symfony/yaml/Escaper\\.php$%', $filePath)
+                || preg_match('%symfony/yaml/Unescaper\\.php$%', $filePath)
             ) {
                 $content = str_replace(html_entity_decode('&nbsp;'), "\\xC2\\xA0", $content);
             }
