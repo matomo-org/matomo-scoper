@@ -152,6 +152,8 @@ return [
                 || preg_match('%symfony/string/AbstractUnicodeString\\.php$%', $filePath)
                 || preg_match('%plugins/ImageGraph/StaticGraph\\.php$%', $filePath)
                 || preg_match('%symfony/polyfill-intl-normalizer/Resources/unidata/compatibilityDecomposition\\.php$%', $filePath)
+                || preg_match('%symfony/yaml/Escaper\\.php$%', $filePath)
+                || preg_match('%symfony/yaml/Unescaper\\.php$%', $filePath)
             ) {
                 $content = str_replace(html_entity_decode('&nbsp;'), "\\xC2\\xA0", $content);
             }
