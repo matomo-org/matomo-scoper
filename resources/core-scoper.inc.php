@@ -28,6 +28,7 @@ if ($isRenamingReferences) {
             ->in(__DIR__)
             ->exclude('build')
             ->exclude('vendor/prefixed')
+            ->exclude('vendor/composer')
             ->exclude('node_modules')
             ->exclude('tmp')
             ->exclude('@types')
