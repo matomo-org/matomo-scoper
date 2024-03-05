@@ -27,7 +27,7 @@ if ($isRenamingReferences) {
             ->files()
             ->in(__DIR__)
             ->exclude('build')
-            ->exclude('vendor')
+            ->exclude('vendor/prefixed')
             ->exclude('node_modules')
             ->exclude('tmp')
             ->exclude('@types')
@@ -84,10 +84,14 @@ return [
                 return $content;
             }
 
-            $content = preg_replace('/([^\\\\A-Za-z0-9_])\\\\PEAR/', '$1\\Matomo\\Dependencies\\PEAR', $content);
-            $content = preg_replace('/([^\\\\A-Za-z0-9_])\\\\Archive_Tar/', '$1\\Matomo\\Dependencies\\Archive_Tar', $content);
-            $content = preg_replace('/([^\\\\A-Za-z0-9_])\\\\Console_Getopt/', '$1\\Matomo\\Dependencies\\Console_Getopt', $content);
-            $content = preg_replace('/([^\\\\A-Za-z0-9_])\\\\OS_Guess/', '$1\\Matomo\\Dependencies\\OS_Guess', $content);
+            if (!preg_match('/\\.php$/', $filePath)) {
+                return $content;
+            }
+
+            $content = preg_replace('/([^\\\\A-Za-z0-9_])\\\\?PEAR(?!\\/)/', '$1\\Matomo\\Dependencies\\PEAR', $content);
+            $content = preg_replace('/([^\\\\A-Za-z0-9_])\\\\?Archive_Tar(?!\\/)/', '$1\\Matomo\\Dependencies\\Archive_Tar', $content);
+            $content = preg_replace('/([^\\\\A-Za-z0-9_])\\\\?Console_Getopt(?!\\/)/', '$1\\Matomo\\Dependencies\\Console_Getopt', $content);
+            $content = preg_replace('/([^\\\\A-Za-z0-9_])\\\\?OS_Guess(?!\\/)/', '$1\\Matomo\\Dependencies\\OS_Guess', $content);
             return $content;
         },
 
