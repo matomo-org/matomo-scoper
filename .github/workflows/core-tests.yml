@@ -80,6 +80,8 @@ jobs:
           git submodule update -q --init --recursive --depth 1
           cd ${{ github.workspace }}
 
+      - name: Install package ripgrep
+        run: sudo apt-get install ripgrep
       - name: running tests
         uses: matomo-org/github-action-tests@main
         with:
