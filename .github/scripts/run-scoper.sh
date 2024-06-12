@@ -25,6 +25,13 @@ else
   cd matomo
 fi
 
-php8.2 --ini
+sudo sed -i 's/memory_limit[[:space:]]*=[[:space:]]*[0-9-]\+/memory_limit = 2048M/g' /etc/php/8.2/cli/php.ini
+
+if [[ -f "/etc/php/8.2/cli/conf.d/99-pecl.ini" ]]; then
+  sudo sed -i 's/memory_limit[[:space:]]*=[[:space:]]*[0-9-]\+[[:space:]]*M/memory_limit = 2048M/g' /etc/php/8.2/cli/conf.d/99-pecl.ini
+fi
+
+echo "Memory limit used:"
+php -r 'echo ini_get("memory_limit")."\n";'
 
 php8.2 "$MATOMO_SCOPER_PATH" scope -y --rename-references .
