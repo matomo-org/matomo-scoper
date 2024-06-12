@@ -57,8 +57,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        #type: [ 'UnitTests', 'SystemTestsPlugins', 'SystemTestsCore', 'IntegrationTestsCore', 'IntegrationTestsPlugins' ]
-        type: ['SystemTestsPlugins']
+        type: [ 'UnitTests', 'SystemTestsPlugins', 'SystemTestsCore', 'IntegrationTestsCore', 'IntegrationTestsPlugins' ]
         php: [ '7.2', '8.2' ]
         adapter: [ 'PDO_MYSQL', 'MYSQLI' ]
         exclude:
@@ -93,10 +92,6 @@ jobs:
           artifacts-pass: ${{ secrets.ARTIFACTS_PASS }}
           upload-artifacts: ${{ matrix.php == '7.2' }}
           setup-script: .github/scripts/run-scoper.sh
-      - run: pwd && ls && ls ${{ github.workspace }} && ls ${{ github.workspace }}/matomo/tmp/templates_c
-        if: always()
-      #- run: for l in $(ls ${{ github.workspace }}/matomo/tmp/templates_c/$h/*); do echo "$l"; cat "${{ github.workspace }}/matomo/tmp/templates_c/$h/$l"; done
-      #  if: always()
   UI:
     runs-on: ubuntu-20.04
     strategy:

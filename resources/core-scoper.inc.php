@@ -134,6 +134,11 @@ return [
                 $content = preg_replace("/([^\\\\])(_?twig_[a-z_0-9]+)\('/", '${1}\\Matomo\\Dependencies\\\${2}(\'', $content);
             }
 
+            // scope escaped classes in template strings
+            if (!$isRenamingReferences && strpos($filePath, 'twig/twig') !== false) {
+                $content = preg_replace("/(['\"])\\\\\\\\Twig\\\\\\\\/", '${1}\\\\\\\\Matomo\\\\\\\\Dependencies\\\\\\\\Twig\\\\\\\\', $content);
+            }
+
             return $content;
         },
 
