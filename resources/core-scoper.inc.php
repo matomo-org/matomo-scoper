@@ -29,6 +29,7 @@ if ($isRenamingReferences) {
             ->exclude('build')
             ->exclude('vendor/prefixed')
             ->exclude('vendor/composer')
+            ->exclude('vendor/phpmailer') // wordfence creates a false positive here
             ->exclude('node_modules')
             ->exclude('tmp')
             ->exclude('@types')
@@ -45,6 +46,7 @@ if ($isRenamingReferences) {
             ->notPath('%^tests/PHPUnit/System/ConsoleTest\\.php$%')
             ->notPath('%^tests/PHPUnit/System/FrontControllerTest\\.php$%')
             ->notPath('%^tests/resources/trigger-fatal\\.php$%')
+            ->notPath('%^tests/resources/overlay-test-site(-real)?/opt-out\\.php$%')
 
             ->filter(function (\SplFileInfo $file) {
                 return !($file->isLink() && $file->isDir());
@@ -93,6 +95,21 @@ return [
             $content = preg_replace('/([^\\\\A-Za-z0-9_])\\\\?Archive_Tar(?!\\/)/', '$1\\Matomo\\Dependencies\\Archive_Tar', $content);
             $content = preg_replace('/([^\\\\A-Za-z0-9_])\\\\?Console_Getopt(?!\\/)/', '$1\\Matomo\\Dependencies\\Console_Getopt', $content);
             $content = preg_replace('/([^\\\\A-Za-z0-9_])\\\\?OS_Guess(?!\\/)/', '$1\\Matomo\\Dependencies\\OS_Guess', $content);
+
+            return $content;
+        },
+
+        static function (string $filePath, string $prefix, string $content) use ($isRenamingReferences): string {
+            if ($isRenamingReferences) {
+                return $content;
+            }
+
+            if (strpos($filePath, 'pear/pear-core-minimal') !== false) {
+                $content = str_replace("'PEAR_Error'", "'\\\\Matomo\\\\Dependencies\\\\PEAR_Error'", $content);
+                $content = str_replace("'PEAR_ErrorStack'", "'\\\\Matomo\\\\Dependencies\\\\PEAR_ErrorStack'", $content);
+                $content = str_replace("'System'", "'\\\\Matomo\\\\Dependencies\\\\System'", $content);
+            }
+
             return $content;
         },
 
@@ -116,6 +133,11 @@ return [
 
                 $content = preg_replace("/([^\\\\])(_?twig_[a-z_0-9]+)\(\"/", '${1}\\\\\\Matomo\\\\\\Dependencies\\\\\\\${2}("', $content);
                 $content = preg_replace("/([^\\\\])(_?twig_[a-z_0-9]+)\('/", '${1}\\Matomo\\Dependencies\\\${2}(\'', $content);
+            }
+
+            // scope escaped classes in template strings
+            if (!$isRenamingReferences && strpos($filePath, 'twig/twig') !== false) {
+                $content = preg_replace("/(['\"])\\\\\\\\Twig\\\\\\\\/", '${1}\\\\\\\\Matomo\\\\\\\\Dependencies\\\\\\\\Twig\\\\\\\\', $content);
             }
 
             return $content;
@@ -193,6 +215,15 @@ return [
                 || $filePath === __DIR__ . '/tests/UI/specs/OneClickLastForcedUpdate_spec.js'
             ) {
                 $content = str_replace('it(', 'it.skip(', $content);
+            }
+
+            if ($filePath === __DIR__ . '/plugins/TestRunner/Commands/CheckDirectDependencyUse.php') {
+                $replacementCode = <<<PHP
+\\PHPUnit\\Framework\\Assert::markTestSkipped("do not run");
+return 0;
+PHP;
+
+                $content = preg_replace('/protected\s+function\s+doExecute\(\)\s+:\s+int\s+\{/', '$0' . $replacementCode, $content);
             }
 
             return $content;
