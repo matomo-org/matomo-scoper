@@ -46,6 +46,7 @@ if ($isRenamingReferences) {
             ->notPath('%^tests/PHPUnit/System/ConsoleTest\\.php$%')
             ->notPath('%^tests/PHPUnit/System/FrontControllerTest\\.php$%')
             ->notPath('%^tests/resources/trigger-fatal\\.php$%')
+            ->notPath('%^tests/resources/overlay-test-site(-real)?/opt-out\\.php$%')
 
             ->filter(function (\SplFileInfo $file) {
                 return !($file->isLink() && $file->isDir());
