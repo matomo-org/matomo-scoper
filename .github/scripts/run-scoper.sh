@@ -25,4 +25,6 @@ else
   cd matomo
 fi
 
+php8.2 --ini
+
 php8.2 "$MATOMO_SCOPER_PATH" scope -y --rename-references .
