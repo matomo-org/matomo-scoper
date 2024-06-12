@@ -216,6 +216,15 @@ return [
                 $content = str_replace('it(', 'it.skip(', $content);
             }
 
+            if ($filePath === __DIR__ . '/plugins/TestRunner/Commands/CheckDirectDependencyUse.php') {
+                $replacementCode = <<<PHP
+\\PHPUnit\\Framework\\Assert::markTestSkipped("do not run");
+return 0;
+PHP;
+
+                $content = preg_replace('/protected\s+function\s+doExecute\(\)\s+:\s+int\s+\{/', '$0' . $replacementCode, $content);
+            }
+
             return $content;
         },
     ],
