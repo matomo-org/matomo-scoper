@@ -40,6 +40,7 @@ if ($isRenamingReferences) {
             ->notPath('%^console$%')
             ->notPath('%^tests/javascript/index.php$%')
             ->notName('scoper.inc.php')
+            ->notPath('%^plugins/GeoIp2/data/%')
 
             // prefixing will change the line number of an exception and break the test, so we'll just skip it
             ->notPath('%^plugins/Monolog/tests/Unit/Processor/ExceptionToTextProcessorTest\\.php$%')
