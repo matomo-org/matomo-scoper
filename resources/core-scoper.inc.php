@@ -202,7 +202,7 @@ return [
 
         // patcher to make sure #[\SensitiveParameter] is on a newline by itself
         static function (string $filePath, string $prefix, string $content): string {
-            $content = preg_replace('/(\S) #\\[\\\\SensitiveParameter] (\S)/', "\\1\n#[\\SensitiveParameter]\n\\2", $content);
+            $content = preg_replace('/(\S)\s*#\\[\\\\SensitiveParameter]\s*(\S)/', "\\1\n#[\\SensitiveParameter]\n\\2", $content);
             return $content;
         },
 
