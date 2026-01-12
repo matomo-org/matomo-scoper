@@ -123,6 +123,10 @@ return [
                 $content = str_replace('$obj = new $class(...$args);', "\$class = 'Matomo\\\\Dependencies\\\\' . \$class;\n        \$obj = new \$class(...\$args);", $content);
             }
 
+            if (strpos($filePath, 'wikimedia/less.php') !== false) {
+                $content = str_replace("'Less_Functions'", "'Matomo\\\\Dependencies\\\\Less_Functions'", $content);
+            }
+
             return $content;
         },
 
@@ -135,6 +139,7 @@ return [
                 $content = str_replace('"lessc"', '"\\\\Matomo\\\\Dependencies\\\\lessc"', $content);
                 $content = str_replace('use lessc;', 'use Matomo\\Dependencies\\lessc;', $content);
             }
+
             return $content;
         },
 
