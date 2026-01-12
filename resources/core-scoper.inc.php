@@ -113,6 +113,19 @@ return [
             return $content;
         },
 
+        // patchers for less.php
+        static function (string $filePath, string $prefix, string $content) use ($isRenamingReferences): string {
+            if (!$isRenamingReferences) {
+                return $content;
+            }
+
+            if (str_ends_with($filePath, '.php')) {
+                $content = str_replace('"lessc"', '"\\\\Matomo\\\\Dependencies\\\\lessc"', $content);
+                $content = str_replace('use lessc;', 'use Matomo\\Dependencies\\lessc;', $content);
+            }
+            return $content;
+        },
+
         // patchers for twig
         static function (string $filePath, string $prefix, string $content) use ($isRenamingReferences): string {
             // correct use statements in generated templates
