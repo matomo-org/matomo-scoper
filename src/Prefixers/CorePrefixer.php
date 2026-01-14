@@ -29,6 +29,7 @@ class CorePrefixer extends Prefixer
         'pear/archive_tar',
         'pear/console_getopt',
         'pear/pear-core-minimal',
+        'wikimedia/less.php',
     ];
 
     const DEPENDENCIES_TO_IGNORE = [
