@@ -127,6 +127,9 @@ return [
                 $content = str_replace("'Less_Functions'", "'Matomo\\\\Dependencies\\\\Less_Functions'", $content);
             }
 
+            // prefix class string literals
+            $content = preg_replace('/= \'(Less_.*?)\'/', "= 'Matomo\\\\Dependencies\\\\\$1'", $content);
+
             return $content;
         },
 
