@@ -88,7 +88,29 @@ abstract class Prefixer
         $command->setPlugin($this->getPluginNameIfAny());
         $command->passthru();
 
+        $this->moveAttributesOntoTheirOwnLine();
+
         $this->removePrefixedDependencies($dependenciesToPrefix);
+    }
+
+    /**
+     * Attributes are kept rather than downgraded, so they have to sit on a line of their own to stay inert on the
+     * older PHP versions the scoped dependencies still support.
+     */
+    private function moveAttributesOntoTheirOwnLine(): void
+    {
+        $changed = $this->getAttributeFormatter()->formatDirectory($this->paths->getRepoPath() . '/vendor/prefixed');
+
+        if (!empty($changed)) {
+            $this->output->writeln(
+                sprintf('<info>  Moved attributes onto their own line in %d file(s).</info>', count($changed))
+            );
+        }
+    }
+
+    protected function getAttributeFormatter(): AttributeFormatter
+    {
+        return new AttributeFormatter();
     }
 
     private function renameReferencesToScopedDependencies(array $dependenciesToPrefix, array $namespacesToInclude): void
