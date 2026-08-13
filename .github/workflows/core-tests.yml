@@ -53,7 +53,7 @@ concurrency:
 
 jobs:
   PHP:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -93,7 +93,7 @@ jobs:
           upload-artifacts: ${{ matrix.php == '7.2' }}
           setup-script: .github/scripts/run-scoper.sh
   UI:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
