@@ -44,6 +44,9 @@ abstract class Prefixer
         $this->scopeDependencies($dependenciesToPrefix, $namespacesToInclude);
         if ($renameReferences) {
             $this->renameReferencesToScopedDependencies($dependenciesToPrefix, $namespacesToInclude);
+
+            // php-scoper re-prints the project's own files in this mode, which puts attributes back inline
+            $this->moveAttributesOntoTheirOwnLine($this->paths->getRepoPath());
         }
 
         return $dependenciesToPrefix;
@@ -88,7 +91,29 @@ abstract class Prefixer
         $command->setPlugin($this->getPluginNameIfAny());
         $command->passthru();
 
+        $this->moveAttributesOntoTheirOwnLine($this->paths->getRepoPath() . '/vendor/prefixed');
+
         $this->removePrefixedDependencies($dependenciesToPrefix);
+    }
+
+    /**
+     * Attributes are kept rather than downgraded, so they have to sit on a line of their own to stay inert on the
+     * older PHP versions the scoped dependencies still support.
+     */
+    private function moveAttributesOntoTheirOwnLine(string $directory): void
+    {
+        $changed = $this->getAttributeFormatter()->formatDirectory($directory);
+
+        if (!empty($changed)) {
+            $this->output->writeln(
+                sprintf('<info>  Moved attributes onto their own line in %d file(s).</info>', count($changed))
+            );
+        }
+    }
+
+    protected function getAttributeFormatter(): AttributeFormatter
+    {
+        return new AttributeFormatter();
     }
 
     private function renameReferencesToScopedDependencies(array $dependenciesToPrefix, array $namespacesToInclude): void
