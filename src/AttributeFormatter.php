@@ -84,7 +84,14 @@ class AttributeFormatter
                 continue;
             }
 
-            $indent = $this->indentOfLineBeingWritten($result);
+            $line = $this->lineBeingWritten($result);
+            preg_match('/^[ \t]*/', $line, $matches);
+            $indent = $matches[0];
+
+            // An attribute moved off a line that has code gets one extra level to mark what follows as a
+            // continuation; one already starting its own line (e.g. the second of several inline attributes,
+            // which the previous iteration just moved) keeps that indent, so attributes do not staircase
+            $continuationIndent = $line === $indent ? $indent : $indent . '    ';
 
             // Copy the attribute across, counting brackets so that arrays in its arguments do not end it early
             $depth = 0;
@@ -107,8 +114,7 @@ class AttributeFormatter
                 continue;
             }
 
-            // The extra indent marks what follows as a continuation of the line the attribute was written on
-            $result .= "\n" . $indent . '    ';
+            $result .= "\n" . $continuationIndent;
             $this->dropSeparatingSpace($tokens, $i);
         }
 
@@ -116,16 +122,13 @@ class AttributeFormatter
     }
 
     /**
-     * Leading whitespace of the line currently being written, so what follows the attribute lines up with it.
+     * The line currently being written, so what follows the attribute can line up with it.
      */
-    private function indentOfLineBeingWritten(string $emitted): string
+    private function lineBeingWritten(string $emitted): string
     {
         $lineStart = strrpos($emitted, "\n");
-        $line = $lineStart === false ? $emitted : substr($emitted, $lineStart + 1);
 
-        preg_match('/^[ \t]*/', $line, $matches);
-
-        return $matches[0];
+        return $lineStart === false ? $emitted : substr($emitted, $lineStart + 1);
     }
 
     /**

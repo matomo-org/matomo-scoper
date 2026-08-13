@@ -55,6 +55,16 @@ class AttributeFormatterTest extends TestCase
         );
     }
 
+    public function test_format_keepsMultipleAttributesForOneTargetAtTheSameIndentation()
+    {
+        $code = "<?php\nclass A {\n    public function f(#[A] #[B] \$a) {}\n}\n";
+
+        $this->assertSame(
+            "<?php\nclass A {\n    public function f(#[A]\n        #[B]\n        \$a) {}\n}\n",
+            $this->formatter->format($code)
+        );
+    }
+
     public function test_format_leavesNoAttributeWithCodeFollowingItOnTheSameLine()
     {
         $formatted = $this->formatter->format("<?php\nfunction f(#[A] \$a, #[B] \$b) {}\n");
