@@ -38,7 +38,24 @@ $proxyFileMarker
 \$originalLoader = require_once __DIR__ . DIRECTORY_SEPARATOR . 'autoload_original.php';
 
 if (is_file(__DIR__ . '/prefixed/vendor/autoload.php')) {
-    require_once __DIR__ . '/prefixed/vendor/autoload.php';
+    // Composer keys its `files` autoloading by a hash of the package name and the file's path, and prefixing changes
+    // neither. Every plugin scoping the same package therefore produces the same key, so without isolating the marker
+    // only the first plugin loaded would have its prefixed copies included, and every other plugin's would be
+    // silently skipped, leaving their functions and bootstraps undefined.
+    \$scoperPreviouslyAutoloadedFiles = \$GLOBALS['__composer_autoload_files'] ?? null;
+    \$GLOBALS['__composer_autoload_files'] = [];
+
+    try {
+        require_once __DIR__ . '/prefixed/vendor/autoload.php';
+    } finally {
+        if (\$scoperPreviouslyAutoloadedFiles === null) {
+            unset(\$GLOBALS['__composer_autoload_files']);
+        } else {
+            \$GLOBALS['__composer_autoload_files'] = \$scoperPreviouslyAutoloadedFiles;
+        }
+
+        unset(\$scoperPreviouslyAutoloadedFiles);
+    }
 }
 
 return \$originalLoader;
@@ -56,13 +73,11 @@ EOF;
             return;
         }
 
-        if ($this->isFileAutoloadProxy($this->outputPath)) {
-            $this->output->writeln("<comment>Proxy autoload.php already exists, skipping generation.</comment>");
-            return;
+        // Only the first run finds a real composer autoloader here to keep aside; a later run would otherwise back up
+        // the proxy over it. The proxy itself is rewritten every time, so changes to it reach plugins that have one.
+        if (!$this->isFileAutoloadProxy($this->outputPath)) {
+            copy($this->outputPath, $originalAutoloadPath);
         }
-
-        // backup existing file
-        copy($this->outputPath, $originalAutoloadPath);
 
         parent::write();
     }
