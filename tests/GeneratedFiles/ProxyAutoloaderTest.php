@@ -61,12 +61,16 @@ class ProxyAutoloaderTest extends ComposerTestCase
 
         $rootPath = $this->setUpTestProject([], [], []);
         $this->putTestProjectFile('vendor/autoload.php', $existingAutoloadContents);
+        $this->putTestProjectFile('vendor/autoload_original.php', "<?php return 'the real composer autoloader';");
 
         $file = new ProxyAutoloader($rootPath . '/vendor', new NullOutput());
         $file->write();
 
         // the real composer autoloader was set aside on the first run, so a proxy must never overwrite that backup
-        $this->assertFileDoesNotExist($rootPath . '/vendor/autoload_original.php');
+        $this->assertSame(
+            "<?php return 'the real composer autoloader';",
+            file_get_contents($rootPath . '/vendor/autoload_original.php')
+        );
 
         // the proxy itself is rewritten, so changes to it reach projects that already have one
         $contents = file_get_contents($rootPath . '/vendor/autoload.php');
@@ -74,25 +78,67 @@ class ProxyAutoloaderTest extends ComposerTestCase
         $this->assertStringContainsString(ProxyAutoloader::PROXY_FILE_MARKER, $contents);
     }
 
-    public function test_getContent_isolatesComposerAutoloadFileMarkersAroundThePrefixedAutoloader()
+    public function test_write_producesAProxyThatLoadsPrefixedFileAutoloads_whoseMarkersAnotherProjectAlreadySet()
+    {
+        // mimics Composer's `files` autoloading: keyed on a hash that prefixing does not change, so a copy of the
+        // same package scoped by another plugin has already claimed it
+        $vendorPath = $this->setUpProxyExecutionProject(
+            <<<'EOF'
+            <?php
+            if (empty($GLOBALS['__composer_autoload_files']['samehash'])) {
+                $GLOBALS['__composer_autoload_files']['samehash'] = true;
+                $GLOBALS['prefixedFilesLoaded'] = ($GLOBALS['prefixedFilesLoaded'] ?? 0) + 1;
+            }
+            EOF
+        );
+
+        $GLOBALS['__composer_autoload_files'] = ['samehash' => true];
+
+        try {
+            $loader = require $vendorPath . '/autoload.php';
+
+            $this->assertSame('the original loader', $loader);
+            $this->assertSame(1, $GLOBALS['prefixedFilesLoaded'] ?? 0, 'the prefixed file autoload entry was skipped');
+            $this->assertSame(['samehash' => true], $GLOBALS['__composer_autoload_files']);
+        } finally {
+            unset($GLOBALS['__composer_autoload_files'], $GLOBALS['prefixedFilesLoaded']);
+        }
+    }
+
+    public function test_write_producesAProxyThatRestoresTheMarkers_whenThePrefixedAutoloaderThrows()
+    {
+        $vendorPath = $this->setUpProxyExecutionProject(
+            "<?php\n\$GLOBALS['__composer_autoload_files']['clobbered'] = true;\nthrow new \\Exception('prefixed autoloader failure');"
+        );
+
+        unset($GLOBALS['__composer_autoload_files']);
+
+        try {
+            require $vendorPath . '/autoload.php';
+            $this->fail('the prefixed autoloader exception was swallowed');
+        } catch (\Exception $ex) {
+            $this->assertSame('prefixed autoloader failure', $ex->getMessage());
+        } finally {
+            $markersAfterFailure = $GLOBALS['__composer_autoload_files'] ?? 'unset';
+            unset($GLOBALS['__composer_autoload_files']);
+        }
+
+        $this->assertSame('unset', $markersAfterFailure, 'the markers were not restored to their previous, unset state');
+    }
+
+    private function setUpProxyExecutionProject(string $prefixedAutoloaderContents): string
     {
         $rootPath = $this->setUpTestProject([], [], []);
 
-        $file = new ProxyAutoloader($rootPath . '/vendor', new NullOutput());
-        $content = $file->getContent();
+        // a fresh path per test, so the proxy's require_once statements actually execute
+        $vendorPath = $rootPath . '/exec-' . uniqid() . '/vendor';
+        mkdir($vendorPath . '/prefixed/vendor', 0777, true);
 
-        $clearMarkers = "\$GLOBALS['__composer_autoload_files'] = [];";
-        $requirePrefixed = "require_once __DIR__ . '/prefixed/vendor/autoload.php';";
+        file_put_contents($vendorPath . '/autoload.php', "<?php return 'the original loader';");
+        file_put_contents($vendorPath . '/prefixed/vendor/autoload.php', $prefixedAutoloaderContents);
 
-        $this->assertStringContainsString($clearMarkers, $content);
-        $this->assertStringContainsString($requirePrefixed, $content);
-        // restored afterwards even if the prefixed autoloader throws
-        $this->assertStringContainsString('finally', $content);
+        (new ProxyAutoloader($vendorPath, new NullOutput()))->write();
 
-        $this->assertLessThan(
-            strpos($content, $requirePrefixed),
-            strpos($content, $clearMarkers),
-            'the markers have to be cleared before the prefixed autoloader runs, or its files are skipped'
-        );
+        return $vendorPath;
     }
 }
