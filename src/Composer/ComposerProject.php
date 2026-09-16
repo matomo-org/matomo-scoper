@@ -112,7 +112,10 @@ class ComposerProject
                 $dependency->writeTo(sprintf('%s/%s/%s/%s/composer.json', $this->path, 'vendor', $folder, $subfolder, 'composer.json'));
 
                 foreach ($autoload['classmap'] ?? [] as $classmapFolder) {
-                    mkdir($this->path . '/vendor/' . $dependency->getName() . '/' . $classmapFolder, 0777, true);
+                    $classmapFolderPath = $this->path . '/vendor/' . $dependency->getName() . '/' . $classmapFolder;
+                    if (!is_dir($classmapFolderPath)) {
+                        mkdir($classmapFolderPath, 0777, true);
+                    }
                 }
             }
         }
