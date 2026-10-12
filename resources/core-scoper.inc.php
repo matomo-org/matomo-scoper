@@ -46,7 +46,12 @@ if ($isRenamingReferences) {
             ->notPath('%^tests/PHPUnit/System/ConsoleTest\\.php$%')
             ->notPath('%^tests/PHPUnit/System/FrontControllerTest\\.php$%')
             ->notPath('%^tests/resources/trigger-fatal\\.php$%')
-            ->notPath('%^tests/resources/overlay-test-site(-real)?/opt-out\\.php$%')
+
+            // HTML test pages with inline PHP, which reprinting breaks
+            ->notPath('%^tests/resources/overlay-test-site(-real)?/%')
+
+            // reprinting turns the escaped whitespace in Mbstring.php into raw characters, which fails core's fake-space check
+            ->notPath('%^vendor/symfony/polyfill-mbstring/%')
 
             ->filter(function (\SplFileInfo $file) {
                 return !($file->isLink() && $file->isDir());
