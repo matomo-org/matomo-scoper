@@ -30,6 +30,8 @@ if ($isRenamingReferences) {
             ->exclude('vendor/prefixed')
             ->exclude('vendor/composer')
             ->exclude('vendor/phpmailer') // wordfence creates a false positive here
+            // uses no prefixed dependency, and reprinting its data arrays adds ~3 MB, failing core's release size check
+            ->exclude('vendor/tecnickcom')
             ->exclude('node_modules')
             ->exclude('tmp')
             ->exclude('@types')
@@ -126,6 +128,12 @@ return [
 
             if (str_ends_with($filePath, 'wikimedia/less.php/lib/Less/Parser.php')) {
                 $content = str_replace('$obj = new $class(...$args);', "\$class = 'Matomo\\\\Dependencies\\\\' . \$class;\n        \$obj = new \$class(...\$args);", $content);
+            }
+
+            // iscolor(), isnumber() etc. pass bare class names to is_a(), so guarded mixins never matched
+            if (str_ends_with($filePath, 'wikimedia/less.php/lib/Less/Functions.php')) {
+                $content = str_replace('\\is_a($n, $type)', "\\is_a(\$n, 'Matomo\\\\Dependencies\\\\' . \$type)", $content);
+                $content = str_replace("'Less_Parser::round'", "'Matomo\\\\Dependencies\\\\Less_Parser::round'", $content);
             }
 
             if (strpos($filePath, 'wikimedia/less.php') !== false) {
