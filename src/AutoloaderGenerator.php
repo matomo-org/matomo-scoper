@@ -77,7 +77,9 @@ class AutoloaderGenerator
             $this->composerProject->removeDummyComposerJsonFilesForPrefixedDeps();
         }
 
-        $this->composerProject->replaceStaticAutoloadFiles($unprefixedAutoloadFiles);
+        if ($unprefixedAutoloadFiles !== null) {
+            $this->composerProject->replaceStaticAutoloadFiles($unprefixedAutoloadFiles);
+        }
 
         $proxyAutoloader = new ProxyAutoloader($repoPath . '/vendor', $this->output);
         $proxyAutoloader->write();

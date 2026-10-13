@@ -50,10 +50,13 @@ class ComposerProject
         $autoloadStaticContents = file_get_contents($autoloadStatic);
 
         if (empty($autoloadStaticContents)) {
-            return null;
+            throw new \RuntimeException("$autoloadStatic is empty.");
         }
 
-        preg_match('/public static \$files.*?;/s', $autoloadStaticContents, $matches);
+        // composer only writes $files when some package, the root included, has a "files" autoload entry
+        if (!preg_match('/public static \$files.*?;/s', $autoloadStaticContents, $matches)) {
+            return null;
+        }
         $autoloadFiles = $matches[0];
 
         $autoloadFiles = preg_split('/[,()\[\]]+\s*/', $autoloadFiles);
