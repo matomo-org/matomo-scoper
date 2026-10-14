@@ -87,7 +87,7 @@ jobs:
       # The scoper's dependencies need PHP 8.2, which the runner image does not ship. The tests action then
       # sets up the job's PHP as the default, leaving php8.2 installed for run-scoper.sh.
       - name: Set up PHP 8.2 for the scoper
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
           php-version: '8.2'
           coverage: none
@@ -125,7 +125,7 @@ jobs:
       # The scoper's dependencies need PHP 8.2, which the runner image does not ship. The tests action then
       # sets up the job's PHP as the default, leaving php8.2 installed for run-scoper.sh.
       - name: Set up PHP 8.2 for the scoper
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
           php-version: '8.2'
           coverage: none
