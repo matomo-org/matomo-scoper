@@ -30,6 +30,8 @@ if ($isRenamingReferences) {
             ->exclude('vendor/prefixed')
             ->exclude('vendor/composer')
             ->exclude('vendor/phpmailer') // wordfence creates a false positive here
+            // uses no prefixed dependency, and reprinting its data arrays adds ~3 MB, failing core's release size check
+            ->exclude('vendor/tecnickcom')
             ->exclude('node_modules')
             ->exclude('tmp')
             ->exclude('@types')
@@ -46,7 +48,12 @@ if ($isRenamingReferences) {
             ->notPath('%^tests/PHPUnit/System/ConsoleTest\\.php$%')
             ->notPath('%^tests/PHPUnit/System/FrontControllerTest\\.php$%')
             ->notPath('%^tests/resources/trigger-fatal\\.php$%')
-            ->notPath('%^tests/resources/overlay-test-site(-real)?/opt-out\\.php$%')
+
+            // HTML test pages with inline PHP, which reprinting breaks
+            ->notPath('%^tests/resources/overlay-test-site(-real)?/%')
+
+            // reprinting turns the escaped whitespace in Mbstring.php into raw characters, which fails core's fake-space check
+            ->notPath('%^vendor/symfony/polyfill-mbstring/%')
 
             ->filter(function (\SplFileInfo $file) {
                 return !($file->isLink() && $file->isDir());
@@ -121,6 +128,12 @@ return [
 
             if (str_ends_with($filePath, 'wikimedia/less.php/lib/Less/Parser.php')) {
                 $content = str_replace('$obj = new $class(...$args);', "\$class = 'Matomo\\\\Dependencies\\\\' . \$class;\n        \$obj = new \$class(...\$args);", $content);
+            }
+
+            // iscolor(), isnumber() etc. pass bare class names to is_a(), so guarded mixins never matched
+            if (str_ends_with($filePath, 'wikimedia/less.php/lib/Less/Functions.php')) {
+                $content = str_replace('\\is_a($n, $type)', "\\is_a(\$n, 'Matomo\\\\Dependencies\\\\' . \$type)", $content);
+                $content = str_replace("'Less_Parser::round'", "'Matomo\\\\Dependencies\\\\Less_Parser::round'", $content);
             }
 
             if (strpos($filePath, 'wikimedia/less.php') !== false) {

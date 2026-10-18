@@ -14,13 +14,13 @@ if [ "$PLUGIN_NAME" != "" ]; then
 
   cd matomo-scoper
 
-  php8.2 $(which composer) install
+  php8.2 "$(which composer)" install
 
   cd "../matomo/plugins/$PLUGIN_NAME"
 else
   MATOMO_SCOPER_PATH="$(pwd)/bin/matomo-scoper"
 
-  php8.2 $(which composer) install
+  php8.2 "$(which composer)" install
 
   cd matomo
 fi
@@ -32,6 +32,6 @@ if [[ -f "/etc/php/8.2/cli/conf.d/99-pecl.ini" ]]; then
 fi
 
 echo "Memory limit used:"
-php -r 'echo ini_get("memory_limit")."\n";'
+php8.2 -r 'echo ini_get("memory_limit")."\n";'
 
 php8.2 "$MATOMO_SCOPER_PATH" scope -y --rename-references .
