@@ -30,6 +30,7 @@ class CorePrefixer extends Prefixer
         'pear/console_getopt',
         'pear/pear-core-minimal',
         'wikimedia/less.php',
+        'matomo/matomo-php-tracker',
     ];
 
     const DEPENDENCIES_TO_IGNORE = [
